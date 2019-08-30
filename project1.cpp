@@ -62,6 +62,9 @@ int main(int argc, char *argv[]){
   char *outfilename;
   outfilename = argv[2];
   ofile.open(outfilename);
-  ofile << setw(15) << setprecision(8) << "relative error=" << error << endl;
+  //ofile <<
+  for(int i = 0; i < n+1; i++){
+    ofile << setw(5) << setprecision(6) <<" x= "<< x[i] << "  u= " << u(x[i])<< " v= " << v[i] << endl;
+  }
   ofile.close();
 }
