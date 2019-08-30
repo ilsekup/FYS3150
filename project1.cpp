@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
   double *g = new double[n];
   double *c = new double[n];
   double *a = new double[n];
-  double *x = new double[n];
+  double *x = new double[n+2]; // x has n+2 long
   double h = 1.0/(n+1);
   x[0] = 0;
   x[n+1] = 1;
