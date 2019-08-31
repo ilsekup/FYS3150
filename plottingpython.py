@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
-
-fil=open('pros', 'r') #reading file
+filename = sys.argv[1] #filename in terminal when running program 
+fil=open(filename, 'r') #reading file
 lines=fil.readlines() #splitting in lines
 v=[]  #making separate lists for the different collums
 u=[]
@@ -20,10 +21,12 @@ v = np.array(v)
 def exact(x):
     return 1 - (1- np.exp(-10))*x - np.exp(-10*x)
 
-xi = np.linspace(0, 1, 10)
-print(exact(xi))
-print(u)
-plt.plot(x, u)
-#plt.plot(x, v)
+xi = np.linspace(0, 1, 100)
+#print(exact(xi))
+#print(u)
+#plt.plot(x, u)
+plt.plot(x, v) #neither u or v look like they should, at all
 plt.plot(xi, exact(xi))
+plt.xlabel('x values')
+plt.ylabel('y values')
 plt.show()
