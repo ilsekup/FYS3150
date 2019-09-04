@@ -51,9 +51,9 @@ int main(int argc, char *argv[]){
   delete [] c;
 
   //summing the error at all points
+  using namespace std;
   std::cout<<"Calculating the error between calculated and expected answer \n";
 
-  using namespace std;
   double diff;
   double avg_error = 0.;
   for (int i=1; i<=n; i++){
@@ -62,6 +62,8 @@ int main(int argc, char *argv[]){
     }
   avg_error /= n;
   cout << "Average relative error = " << avg_error << endl;
+  finish = clock();
+  cout <<"Time elapsed =  " << ( (double)(finish - start)/ CLOCKS_PER_SEC ) <<" seconds" <<endl;
   char *outfilename;
   outfilename = argv[2];
   ofile.open(outfilename);
@@ -69,7 +71,5 @@ int main(int argc, char *argv[]){
     ofile << setw(5) << setprecision(6) <<" x= "<< x[i] << "  u= " << u(x[i])<< " v= " << v[i] << endl;
   }
   ofile.close();
-  finish = clock();
-  cout <<"Time elapsed =  " << ( (double)(finish - start)/ CLOCKS_PER_SEC ) <<" seconds" <<endl;
   return 0;
 }
