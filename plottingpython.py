@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-filename = sys.argv[1] #filename in terminal when running program 
+filename = sys.argv[1] #filename in terminal when running program
 fil=open(filename, 'r') #reading file
 lines=fil.readlines() #splitting in lines
 N = len(lines)
@@ -24,12 +24,11 @@ def exact(x):
     return 1 - (1- np.exp(-10))*x - np.exp(-10*x)
 
 xi = np.linspace(0, 1, 100)
-#print(exact(xi))
-#print(u)
-#plt.plot(x, u)
-plt.plot(x, v, label="calculated") #neither u or v look like they should, at all
-plt.plot(xi, exact(xi),label="exact")
+plt.plot(x, v, label="calculated")
+plt.plot(xi, exact(xi), 'r--', label="exact")
 plt.xlabel('x values')
 plt.ylabel('y values')
+plt.title('Result of the numerical integration')
+plt.grid()
 plt.legend()
 plt.show()
