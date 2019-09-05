@@ -16,7 +16,6 @@ double u(double x){
 }
 int main(int argc, char *argv[]){
   clock_t start, finish;
-  start = clock();
   //initialize vectors for a, b, c, b_tilde, x and v
   int n = atof(argv[1]);//number of points we calculate on
   int N = n+2;//actual number of elements (includes x_0 and x_n+1)
@@ -33,6 +32,7 @@ int main(int argc, char *argv[]){
 
 //doing a loop for finding the new values for vectors
   std::cout << "Starting step 1, overwrites b and b_tilde" << std::endl;
+  start = clock();
   for(int i = 2; i < n+1; i++){
     a[i] = -1, c[i] =-1, b[i] = 2; //initialising vecotors a, b, c
     x[i] = i*h; // making vector x
@@ -48,27 +48,33 @@ int main(int argc, char *argv[]){
     b_tilde[i] -= b_tilde[i+1]*c[i]/b[i+1];
     v[i] = b_tilde[i]/b[i];
   }
+  v[n] = b_tilde[n]/b[n];
+  finish = clock();
   delete [] c;
 
   //summing the error at all points
   using namespace std;
   std::cout<<"Calculating the error between calculated and expected answer \n";
 
-  double diff;
-  double avg_error = 0.;
-  for (int i=1; i<=n; i++){
-    diff = abs(v[i] - u(x[i]));
-    avg_error += log10(diff/u(x[i])); //logarithm of relative error
+  double rel_error;
+  double max_error = log10(abs((v[1] - u(x[1]))/u(x[1])));
+  for (int i=1; i<n; i++){
+    rel_error = log10(abs((v[i] - u(x[i]))/u(x[i]))); //logarithm of relative error
+    if (rel_error>max_error){
+        max_error = rel_error;
     }
-  avg_error /= n;
-  cout << "Average relative error = " << avg_error << endl;
-  finish = clock();
+    }
+  cout << "Max relative error = " << max_error << endl;
   cout <<"Time elapsed =  " << ( (double)(finish - start)/ CLOCKS_PER_SEC ) <<" seconds" <<endl;
   char *outfilename;
   outfilename = argv[2];
   ofile.open(outfilename);
+  ofile << "Max error = " << max_error << endl;
+  ofile << "Time used = " << ( (double)(finish - start)/ CLOCKS_PER_SEC ) << endl;
+  ofile << "   x  ,   u   ,   v" << endl;
+  ofile << "------------------------------" << endl;
   for(int i = 0; i < n+1; i++){
-    ofile << setw(5) << setprecision(6) <<" x= "<< x[i] << "  u= " << u(x[i])<< " v= " << v[i] << endl;
+    ofile << showpoint << setprecision(6) << setw(6) << x[i] << " , " << u(x[i]) << " , " << v[i] << endl;
   }
   ofile.close();
   return 0;
