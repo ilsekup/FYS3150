@@ -9,6 +9,7 @@
 
 std::ofstream ofile;
 using namespace std;
+using namespace arma;
 
 double f(double x){
   return 100*exp(-10*x);
@@ -18,25 +19,15 @@ double u(double x){
   return 1 - (1- exp(-10))*x - exp(-10*x);
 }
 
-void LUdecomposition(double *b_tilde, double n){
-  using namespace arma;
-  mat A = zeros<mat>(n,n);
-  vec b_tilde2(n);
-  for (int i = 0; i < n - 1; i++){ //making the tridiagonal matrix
-    A(i,i) = 2;
-    A(i,i+1) = -1;
-    A(i+1,i) =-1;
-    b_tilde2[i] = b_tilde[i];
-  }
-  A(n-1,n-1) = 2; // setting the last corner element to -2;
+vec LUdecomposition(vec b_tilde, mat A){
   mat L, U;
   lu(L,U,A); // LU-decomposition function from armadillo
-  vec z = solve(L,b_tilde2); // solve for z = U*v, Lz = b_tilde
+  vec z = solve(L,b_tilde); // solve for z = U*v, Lz = b_tilde
   vec v = solve(U,z); //solve for v
-  //v.print("v=");
+  return v;
 }
 
-void solver_Thompson(double *a, double *b, double *c, double *b_tilde, double *&v, int n){
+void solver_Thomas(double *a, double *b, double *c, double *b_tilde, double *&v, int n){
     // Solves the matrix problem (for tridiagonal matrix)
     for(int i = 2; i < n-1; i++){
         b[i] -= c[i-1]*a[i-1]/b[i-1]; // 3 FLOPS
@@ -50,7 +41,7 @@ void solver_Thompson(double *a, double *b, double *c, double *b_tilde, double *&
 }
 
 
-void solver_Thompson_quick(double *b, double *b_tilde, double *&v, int n){
+void solver_Thomas_Specialized(double *b, double *b_tilde, double *&v, int n){
     // Solves the matrix problem in the simplified way
     // Assumes a = -1, b = 2 and c = -1
     // Requires that b is precalculated by b_i = (i+1)/i
@@ -121,7 +112,7 @@ int main(int argc, char *argv[]){
   double hh = h*h; //do this outside loop to minimize flops in loop
 
   //doing a loop for initializing
-  std::cout << "Initializing vectors, and calculating exact vectors" << std::endl;
+  cout << "Initializing vectors, and calculating exact vectors" << endl;
   for(int i = 1; i < n+1; i++){
     a[i] = -1, c[i] =-1, b[i] = 2; //initialising vecotors a, b, c
     x[i] = i*h; // making vector x
@@ -129,23 +120,23 @@ int main(int argc, char *argv[]){
     exact[i] = u(x[i]); // finding exact solution
   }
 
+  cout << "\nCalculating v with standard Thomas algorithm" << endl;
   start = clock();
-  // calculate the solution with the 'slow' algorithm
-  solver_Thompson(a,b,c,b_tilde,v,N);
+  // calculate the solution with the standard algorithm
+  solver_Thomas(a,b,c,b_tilde,v,N);
   finish = clock();
   // free up space since I don't need a or c any more
   delete [] a;
   delete [] c;
 
   // find the error in our numerical solution
-  std::cout<<"Calculating the error between calculated and expected answer \n";
   double max_error = find_max_error(exact,v,N);
 
   // calculate the time it took
   double time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
 
   cout << "Max relative error = " << max_error << endl;
-  cout <<"Time elapsed long version =  " << time_spent <<" seconds" <<endl;
+  cout <<"Time elapsed standard version = " << time_spent <<" seconds" <<endl;
 
   // save results to file
   string outfilename;
@@ -155,35 +146,58 @@ int main(int argc, char *argv[]){
   print_file(max_error,time_spent,v,x, outfilename,n);
 
   // restarts, with the faster algorithm
-  cout << "Restart, test with quicker algorithm \n\n"<<endl;
+  cout << "\nCalculating v with specialized Thomas algorithm"<<endl;
   for(int i = 1; i <= n; i++){
     b[i] = (i+1)/(double)i; //precalculated values for b
     b_tilde[i] = hh*f(x[i]); // resets b_tilde
   }
   start = clock();
-  // calculate the solution with the 'slow' algorithm
-  solver_Thompson_quick(b,b_tilde,v,N);
+  // calculate the solution with the specialized algorithm
+  solver_Thomas_Specialized(b,b_tilde,v,N);
   finish = clock();
   // find the error in our numerical solution, this should be (about) the same
-  std::cout<<"Calculating the error between calculated and expected answer \n";
   max_error = find_max_error(exact,v,N);
 
   // calculate the time it took
   time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
 
   cout << "Max relative error = " << max_error << endl;
-  cout <<"Time elapsed long version =  " << time_spent <<" seconds" <<endl;
+  cout <<"Time elapsed specialized version = " << time_spent <<" seconds" <<endl;
 
   // save results to file
   outfilename = "output_quick_"+number+".data";
 
   print_file(max_error,time_spent,v,x,outfilename,n);
 
-  cout<<"Calculating v using the LU-decomposition\n";
+  delete [] b;
+  delete [] b_tilde;
+
+  cout<<"\nCalculating v using the LU-decomposition"<<endl;
   //timing the LU decomposition
+  mat A = zeros<mat>(n,n);
+  vec b_tilde2(n);
+  vec sol(n);
+  for (int i = 0; i < n - 1; i++){ //making the tridiagonal matrix
+    A(i,i) = 2;
+    A(i,i+1) = -1;
+    A(i+1,i) =-1;
+    b_tilde2[i] = hh*f(x[i+1]);
+  }
+  b_tilde2[n-1] = hh*f(x[n]); 
+  A(n-1,n-1) = 2; // setting the last corner element to -2;
+  
+
   start = clock();
-  LUdecomposition(b_tilde, N);
+  sol = LUdecomposition(b_tilde2, A);
   finish = clock();
+  
+  for (int i = 0; i<n; i++){
+    v[i+1] = sol[i];
+  }
+  
+  max_error = find_max_error(exact,v,N);
+  cout << "Max relative error = " << max_error << endl;
+
   time_spent = ((double)(finish - start)/ CLOCKS_PER_SEC);
   cout <<"Time elapsed LU = " << time_spent << " seconds" <<endl;
   return 0;
