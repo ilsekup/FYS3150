@@ -5,6 +5,7 @@
 #include <iomanip>
 #include "time.h"
 #include <string>
+#include <armadillo>
 
 std::ofstream ofile;
 using namespace std;
@@ -17,6 +18,23 @@ double u(double x){
   return 1 - (1- exp(-10))*x - exp(-10*x);
 }
 
+void LUdecomposition(double *b_tilde, double n){
+  using namespace arma;
+  mat A = zeros<mat>(n,n);
+  vec b_tilde2(n);
+  for (int i = 0; i < n - 1; i++){ //making the tridiagonal matrix
+    A(i,i) = 2;
+    A(i,i+1) = -1;
+    A(i+1,i) =-1;
+    b_tilde2[i] = b_tilde[i];
+  }
+  A(n-1,n-1) = 2; // setting the last corner element to -2;
+  mat L, U;
+  lu(L,U,A); // LU-decomposition function from armadillo
+  vec z = solve(L,b_tilde2); // solve for z = U*v, Lz = b_tilde
+  vec v = solve(U,z); //solve for v
+  //v.print("v=");
+}
 
 void solver_Thompson(double *a, double *b, double *c, double *b_tilde, double *&v, int n){
     // Solves the matrix problem (for tridiagonal matrix)
@@ -34,9 +52,8 @@ void solver_Thompson(double *a, double *b, double *c, double *b_tilde, double *&
 
 void solver_Thompson_quick(double *b, double *b_tilde, double *&v, int n){
     // Solves the matrix problem in the simplified way
-    // Assumes a = -1, b = 2 and c = -1 
+    // Assumes a = -1, b = 2 and c = -1
     // Requires that b is precalculated by b_i = (i+1)/i
-
     // Forwards substitution
     for(int i = 2; i < n-1; i++){
         b_tilde[i] += b_tilde[i-1]/b[i-1]; // 2 FLOPS
@@ -45,6 +62,7 @@ void solver_Thompson_quick(double *b, double *b_tilde, double *&v, int n){
     v[n-2] = b_tilde[n-2]/b[n-2];
     for(int i = n-3; i>0; i--){
         v[i] = (b_tilde[i]+v[i+1])/b[i]; // 2 FLOPS
+
     }
     // sum 4N FLOPS
 }
@@ -59,7 +77,7 @@ void print_file(double error, double t, double *v, double *x, string outfilename
         ofile << "   x  ,   u   ,   v" << endl;
         ofile << "------------------------------" << endl;
         for(int i = 0; i < k+2; i++){
-        ofile << showpoint << setprecision(6) << setw(6) << x[i] << " , " << u(x[i]) << " , " << v[i] << endl;
+        ofile << showpoint << setprecision(6) << setw(6) << x[i] << " , " << u(x[i]) << " , " << v[i] <<endl;
     }
     }
     ofile.close();
@@ -81,6 +99,7 @@ double find_max_error(double *u, double *v, int n){
 
 
 }
+
 int main(int argc, char *argv[]){
   //initialize vectors for a, b, c, b_tilde, x and v
   int n = atof(argv[1]);//number of points we calculate on
@@ -117,7 +136,7 @@ int main(int argc, char *argv[]){
   // free up space since I don't need a or c any more
   delete [] a;
   delete [] c;
- 
+
   // find the error in our numerical solution
   std::cout<<"Calculating the error between calculated and expected answer \n";
   double max_error = find_max_error(exact,v,N);
@@ -133,7 +152,7 @@ int main(int argc, char *argv[]){
   string number = argv[1];
   outfilename = "output_"+number+".data";
 
-  print_file(max_error,time_spent,v,x,outfilename,n);
+  print_file(max_error,time_spent,v,x, outfilename,n);
 
   // restarts, with the faster algorithm
   cout << "Restart, test with quicker algorithm \n\n"<<endl;
@@ -159,5 +178,13 @@ int main(int argc, char *argv[]){
   outfilename = "output_quick_"+number+".data";
 
   print_file(max_error,time_spent,v,x,outfilename,n);
+
+  cout<<"Calculating v using the LU-decomposition\n";
+  //timing the LU decomposition
+  start = clock();
+  LUdecomposition(b_tilde, N);
+  finish = clock();
+  time_spent = ((double)(finish - start)/ CLOCKS_PER_SEC);
+  cout <<"Time elapsed LU = " << time_spent << " seconds" <<endl;
   return 0;
 }
