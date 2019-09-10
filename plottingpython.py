@@ -26,6 +26,82 @@ x = np.array(x)
 u = np.array(u)
 v = np.array(v)
 
+fil2=open("run_info_standard.txt", 'r')
+lines = fil2.readlines()
+num = len(lines)
+N = []; eps = []; time = []
+number_of_runs = []
+for i in range(num):
+    text = lines[i].split("=")
+    N_ = int(text[1].split()[0])
+    time_ = float(text[2].split()[0])
+    eps_ = float(text[3].split()[0])
+    if N_ in N:
+        index = N.index(N_)
+        number_of_runs[index]+=1
+        eps[index] += eps_
+        time[index] += time_
+    else:
+        N.append(N_)
+        eps.append(eps_)
+        time.append(time_)
+        number_of_runs.append(1)
+
+fil2.close()
+t_standard = np.array(time)
+err_standard = np.array(eps)
+N_standard = np.array(N)
+N_runs_standard = np.array(number_of_runs)
+t_standard /= N_runs_standard; err_standard /= N_runs_standard
+
+fil3=open("run_info_specialized.txt", 'r')
+lines = fil3.readlines()
+num = len(lines)
+print("num = ", num)
+N = []; eps = []; time = []
+number_of_runs = []
+for i in range(num):
+    text = lines[i].split("=")
+    N_ = int(text[1].split()[0])
+    time_ = float(text[2].split()[0])
+    eps_ = float(text[3].split()[0])
+    if N_ in N:
+        index = N.index(N_)
+        number_of_runs[index]+=1
+        eps[index] += eps_
+        time[index] += time_
+    else:
+        N.append(N_)
+        eps.append(eps_)
+        time.append(time_)
+        number_of_runs.append(1)
+
+fil3.close()
+t_specialized = np.array(time)
+err_specialized = np.array(eps)
+N_specialized = np.array(N)
+N_runs_specialized = np.array(number_of_runs)
+print(N_runs_specialized)
+t_specialized /= N_runs_specialized; err_specialized /= N_runs_specialized
+
+plt.figure(figsize = (7,5))
+plt.loglog(N_standard,t_standard, label = "Standard Thomas")
+plt.loglog(N_specialized,t_specialized, label = "Specialized Thomas")
+plt.legend()
+plt.xlabel("N",fontsize = 14)
+plt.ylabel("Time [s]",fontsize = 14)
+plt.grid()
+
+plt.figure(figsize = (7,5))
+plt.semilogx(N_standard,err_standard, label = "Standard Thomas")
+plt.semilogx(N_specialized,err_specialized, label = "Specialized Thomas")
+plt.legend()
+plt.xlabel("N",fontsize = 14)
+plt.ylabel(r"$\log_{10}$ of max error",fontsize = 14)
+plt.grid()
+
+plt.figure()
+
 def exact(x):
     return 1 - (1- np.exp(-10))*x - np.exp(-10*x)
 
