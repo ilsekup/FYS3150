@@ -58,19 +58,23 @@ void solver_Thomas_Specialized(double *b, double *b_tilde, double *&v, int n){
     // sum 4N FLOPS
 }
 
-void print_file(double error, double t, double *v, double *x, string outfilename, int k){
+void print_file(double error, double t, double *v, double *x, string outfilename, int k, string run_info_file){
     // prints the results in a textfile
     // includes the numerical solution v if n <= 1e4
-    ofile.open(outfilename);
-    ofile << "Max error = " << error << endl;
-    ofile << "Time used = " << t << endl;
     if (k<=1e4){
+
+        ofile.open(outfilename);
+        ofile << "Max error = " << error << endl;
+        ofile << "Time used = " << t << endl;
         ofile << "   x  ,   u   ,   v" << endl;
         ofile << "------------------------------" << endl;
         for(int i = 0; i < k+2; i++){
-        ofile << showpoint << setprecision(6) << setw(6) << x[i] << " , " << u(x[i]) << " , " << v[i] <<endl;
+          ofile << showpoint << setprecision(6) << setw(6) << x[i] << " , " << u(x[i]) << " , " << v[i] <<endl;
+        }
+        ofile.close();
     }
-    }
+    ofile.open(run_info_file, ios_base::app);
+    ofile << showpoint << setprecision(6) << setw(6) <<"N = " << k << " t = " << t << " eps = " << error << endl;
     ofile.close();
 }
 
@@ -105,8 +109,16 @@ int main(int argc, char *argv[]){
   double *exact = new double[N];
 
   double h = 1.0/(n+1);
+  int runs;
 
   //initialising first elements in the vectors
+  if (argc == 2){
+    runs = 1;
+  }
+  else {
+    runs = atof(argv[2]);
+  }
+
   x[0] = 0, x[n+1] = 1;
   exact[0] = exact[n+1] = 0;
   double hh = h*h; //do this outside loop to minimize flops in loop
@@ -121,29 +133,39 @@ int main(int argc, char *argv[]){
   }
 
   cout << "\nCalculating v with standard Thomas algorithm" << endl;
-  start = clock();
-  // calculate the solution with the standard algorithm
-  solver_Thomas(a,b,c,b_tilde,v,N);
-  finish = clock();
+
+  string run_info_file = "run_info_standard.txt";
+  string outfilename;
+  string number = argv[1];
+  outfilename = "output_"+number+".data";
+  double max_error;
+  double time_spent;
+  a[0]=a[n+1]=c[0]=c[n+1]=-1.0;
+
+  for(int i = 0; i < runs; i++){
+    cout << "run number " << i+1 << endl;
+
+    start = clock();
+    // calculate the solution with the standard algorithm
+    solver_Thomas(a,b,c,b_tilde,v,N);
+    finish = clock();
+    // find the error in our numerical solution
+    max_error = find_max_error(exact,v,N);
+
+    // calculate the time it took
+    time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
+    for(int j=1; j<n+1; j++){
+      b_tilde[j] = hh*f(x[j]);
+      b[j] = 2;
+    }
+    print_file(max_error,time_spent,v,x, outfilename,n,run_info_file);
+  }
   // free up space since I don't need a or c any more
   delete [] a;
   delete [] c;
 
-  // find the error in our numerical solution
-  double max_error = find_max_error(exact,v,N);
-
-  // calculate the time it took
-  double time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
-
   cout << "Max relative error = " << max_error << endl;
   cout <<"Time elapsed standard version = " << time_spent <<" seconds" <<endl;
-
-  // save results to file
-  string outfilename;
-  string number = argv[1];
-  outfilename = "output_"+number+".data";
-
-  print_file(max_error,time_spent,v,x, outfilename,n);
 
   // restarts, with the faster algorithm
   cout << "\nCalculating v with specialized Thomas algorithm"<<endl;
@@ -151,23 +173,30 @@ int main(int argc, char *argv[]){
     b[i] = (i+1)/(double)i; //precalculated values for b
     b_tilde[i] = hh*f(x[i]); // resets b_tilde
   }
-  start = clock();
-  // calculate the solution with the specialized algorithm
-  solver_Thomas_Specialized(b,b_tilde,v,N);
-  finish = clock();
-  // find the error in our numerical solution, this should be (about) the same
-  max_error = find_max_error(exact,v,N);
 
-  // calculate the time it took
-  time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
+  outfilename = "output_quick_"+number+".data";
+  run_info_file = "run_info_specialized.txt";
 
+  for(int i = 0; i<runs; i++){
+    cout << "Run number " << i << endl;
+    start = clock();
+    // calculate the solution with the standard algorithm
+    solver_Thomas_Specialized(b,b_tilde,v,N);
+    finish = clock();
+    // find the error in our numerical solution
+    double max_error = find_max_error(exact,v,N);
+
+    // calculate the time it took
+   double time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
+   for(int j=1; j<n+1; j++){
+    b_tilde[j] = hh*f(x[j]);
+    b[j] = (j+1)/(double)j;
+    }
+    print_file(max_error,time_spent,v,x, outfilename,n,run_info_file);
+  }
+ 
   cout << "Max relative error = " << max_error << endl;
   cout <<"Time elapsed specialized version = " << time_spent <<" seconds" <<endl;
-
-  // save results to file
-  outfilename = "output_quick_"+number+".data";
-
-  print_file(max_error,time_spent,v,x,outfilename,n);
 
   delete [] b;
   delete [] b_tilde;
