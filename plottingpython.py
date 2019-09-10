@@ -77,6 +77,7 @@ for i in range(num):
         number_of_runs.append(1)
 
 fil3.close()
+
 t_specialized = np.array(time)
 err_specialized = np.array(eps)
 N_specialized = np.array(N)
@@ -84,21 +85,56 @@ N_runs_specialized = np.array(number_of_runs)
 print(N_runs_specialized)
 t_specialized /= N_runs_specialized; err_specialized /= N_runs_specialized
 
+fil4=open("run_info_LU.txt", 'r')
+lines = fil4.readlines()
+num = len(lines)
+print("num = ", num)
+N = []; eps = []; time = []
+number_of_runs = []
+for i in range(num):
+    text = lines[i].split("=")
+    N_ = int(text[1].split()[0])
+    time_ = float(text[2].split()[0])
+    eps_ = float(text[3].split()[0])
+    if N_ in N:
+        index = N.index(N_)
+        number_of_runs[index]+=1
+        eps[index] += eps_
+        time[index] += time_
+    else:
+        N.append(N_)
+        eps.append(eps_)
+        time.append(time_)
+        number_of_runs.append(1)
+
+fil4.close()
+
+t_LU = np.array(time)
+err_LU = np.array(eps)
+N_LU = np.array(N)
+N_runs_LU = np.array(number_of_runs)
+print(N_runs_LU)
+t_LU /= N_runs_LU; err_LU /= N_runs_LU
+
 plt.figure(figsize = (7,5))
+plt.title("Time used")
 plt.loglog(N_standard,t_standard, label = "Standard Thomas")
 plt.loglog(N_specialized,t_specialized, label = "Specialized Thomas")
-plt.legend()
+plt.legend(fontsize = 12)
 plt.xlabel("N",fontsize = 14)
 plt.ylabel("Time [s]",fontsize = 14)
 plt.grid()
+plt.savefig("elapsed_time.png")
 
 plt.figure(figsize = (7,5))
+plt.title("Error in numerical simulation",fontsize = 16)
 plt.semilogx(N_standard,err_standard, label = "Standard Thomas")
 plt.semilogx(N_specialized,err_specialized, label = "Specialized Thomas")
-plt.legend()
+plt.legend(fontsize = 12)
 plt.xlabel("N",fontsize = 14)
 plt.ylabel(r"$\log_{10}$ of max error",fontsize = 14)
 plt.grid()
+plt.savefig("error.png")
 
 plt.figure()
 
@@ -112,5 +148,15 @@ plt.xlabel('x values')
 plt.ylabel('y values')
 plt.title('Result of the numerical integration')
 plt.grid()
-plt.legend()
+plt.legend(fontsize = 12)
+
+plt.figure(figsize = (7,5))
+print(N_LU)
+plt.title("Time used LU method",fontsize = 16)
+plt.loglog(N_LU,t_LU)
+plt.xlabel("N",fontsize = 14)
+plt.ylabel("Time [s]",fontsize = 14)
+plt.grid()
+plt.savefig("elapsed_time_LU.png")
+
 plt.show()
