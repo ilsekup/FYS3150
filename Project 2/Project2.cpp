@@ -17,7 +17,7 @@ vec analytic_eigvals(int N,double d,double a){ //making a function for finding t
   }
   return temp;
 }
-
+//finds the largest of the non-diagonal elements and the position for this
 double off(mat A, int N){
   int k, l;
   double A_max = 0.;
@@ -34,28 +34,36 @@ double off(mat A, int N){
   }
   return A_max,k,l;
 }
-//fikk ikke tid til å fullføre i dag, men har begynt på selve metoden som endrer elementene i matrisen.
-void jacobi_method(A, A_max, k, l){
+//this function changes the elements in the matrix
+void jacobi_method(mat A, int k, int l){
   double tau = (A(l,l)- A(k, k))/2*A(k,l);
   double t;
-  if(tau < 0){
-    t =
+  if(tau > 0){
+    t = 1.0/(tau + sqrt(1.0 + tau*tau));
   }
   else{
-    t =
+    t = - 1.0/(-tau + sqrt(1.0 + tau*tau));
   }
   double c = 1/sqrt(1 + t*t);
   double s = t*c;
-  double Akk = A(k, k)//so that we can use it further
-  double All = A(l,l)
+  double Akk = A(k, k); //so that we can use it further
+  double All = A(l,l),
   A(k, k) = Akk*c*c - 2*A(k, l)*c*s + All*s*s;
   A(l, l) = All*c*c - 2*A(k, l)*c*s + Akk*s*s;
   A(k, l) = 0;
   A(l, k) = 0;
+  if(i != k && i != l){
+    double Aik, Ail
+    A(i, k) = Aik
+    A(i, l) = Ail
+    A(i, k) = Aik*c - Ail*s
+    A(i, l) = Ail*c + Aik*s
+  }
+  return;
 }
 
 int main(int argc, char *argv[]){
-  int N = 10;
+  int N = 100;
   mat A = zeros<mat>(N,N);
   double h = 1.0/(double) N; //rho_N = 1 rho_0 = 0
   double hh = h*h;
@@ -73,12 +81,16 @@ int main(int argc, char *argv[]){
   eigvals_a.print("Analytical eigenvalues = ");
 
   //doing the jacobimethod multiple times untill the non diagonal elements are close enough to zero
-  //ikke ferdig, gjør slik at jacobimetoden kjøres gjennom helt til elementene som ikke er på diagonalen er 0
   int counter = 0;
-  while(A_max > 1e-6){
+  double A_max, k, l = off(A, N);
+  cout << "max= " << k << endl;
+
+  while(A_max > 1e-8){
     double A_max, k, l = off(A, N);
-    jacobi_method(A, A_max, k, l);
+    cout<<"k= " << k << endl;
+    jacobi_method(A, k, l);
     counter++;
   }
+  cout<<"number of iterations needed: "<< counter <<endl;
   return 0;
 }
