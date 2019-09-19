@@ -7,6 +7,8 @@
 #include <string>
 #include <armadillo>
 
+#include "Project2.h"
+
 using namespace std;
 using namespace arma;
 
@@ -17,6 +19,7 @@ vec analytic_eigvals(int N,double d,double a){ //making a function for finding t
   }
   return temp;
 }
+
 //finds the largest of the non-diagonal elements and the position for this
 double maxoff(mat A, int N, int * k, int * l ){
   double A_max = 0.;
@@ -63,8 +66,23 @@ mat jacobi_method(mat A, int k, int l, int N){
   }
   return A;
 }
+//doing the jacobimethod multiple times untill the non diagonal elements are close enough to zero
+mat iterative(mat A, int N, int k, int l){
+  int counter = 0;
+  //int k, l;
+  double A_max = maxoff(A, N, &k, &l);
 
-int main(int argc, char *argv[]){
+  while(A_max > 1e-8){
+    A_max = maxoff(A, N, &k, &l);
+    A = jacobi_method(A, k, l, N);
+    counter++;
+  }
+  A.print("A= ");
+  cout<<"number of iterations needed: "<< counter <<endl;
+  return A;
+}
+
+mat initialize(){
   int N = 3;
   mat A = zeros<mat>(N,N);
   double h = 1.0/(double) N; //rho_N = 1 rho_0 = 0
@@ -77,23 +95,22 @@ int main(int argc, char *argv[]){
     A(i,i+1) = A(i+1,i) = a;
   }
   A(N-1,N-1) = 2.0/hh; //setting last diagonal element, as for loop does not go this far
+  return A;
+}
+
+int main(){
+  mat A = initialize();
+  int N = 3;
+  double h = 1.0/3; //rho_N = 1 rho_0 = 0
+  double hh = h*h;
+  double d = 2.0/hh; //diagonal elements
+  double a = -1/hh;
   vec eigvals = eig_sym(A);
   eigvals.print("eigvals = ");
-  vec eigvals_a = analytic_eigvals(N,d,a);
+  vec eigvals_a = analytic_eigvals(3,d,a);
   eigvals_a.print("Analytical eigenvalues = ");
-
-  //doing the jacobimethod multiple times untill the non diagonal elements are close enough to zero
-  int counter = 0;
-  int k, l;
+  int k;
+  int l;
   double A_max = maxoff(A, N, &k, &l);
-
-  while(A_max > 1e-8){
-    A_max = maxoff(A, N, &k, &l);
-    A = jacobi_method(A, k, l, N);
-    A.print("A= ");
-    counter++;
-  }
-  A.print("A= ");
-  cout<<"number of iterations needed: "<< counter <<endl;
-  return 0;
+  mat B = initerative(A, N, k, l);
 }
