@@ -18,7 +18,7 @@ vec analytic_eigvals(int N,double d,double a){ //making a function for finding t
   return temp;
 }
 //finds the largest of the non-diagonal elements and the position for this
-double off(mat A, int N){
+double maxoff(mat A, int N){
   int k, l;
   double A_max = 0.;
   for(int i = 0; i<N; i++){
@@ -52,12 +52,14 @@ void jacobi_method(mat A, int k, int l){
   A(l, l) = All*c*c - 2*A(k, l)*c*s + Akk*s*s;
   A(k, l) = 0;
   A(l, k) = 0;
+  for(i = 0; i < N, i++){
   if(i != k && i != l){
     double Aik, Ail
     A(i, k) = Aik
     A(i, l) = Ail
     A(i, k) = Aik*c - Ail*s
     A(i, l) = Ail*c + Aik*s
+  }
   }
   return;
 }
@@ -82,12 +84,10 @@ int main(int argc, char *argv[]){
 
   //doing the jacobimethod multiple times untill the non diagonal elements are close enough to zero
   int counter = 0;
-  double A_max, k, l = off(A, N);
-  cout << "max= " << k << endl;
+  double A_max, k, l = maxoff(A, N);
 
   while(A_max > 1e-8){
-    double A_max, k, l = off(A, N);
-    cout<<"k= " << k << endl;
+    double A_max, k, l = maxoff(A, N);
     jacobi_method(A, k, l);
     counter++;
   }
