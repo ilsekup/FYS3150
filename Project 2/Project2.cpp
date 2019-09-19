@@ -18,27 +18,26 @@ vec analytic_eigvals(int N,double d,double a){ //making a function for finding t
   return temp;
 }
 //finds the largest of the non-diagonal elements and the position for this
-double maxoff(mat A, int N){
-  int k, l;
+double maxoff(mat A, int N, int * k, int * l ){
   double A_max = 0.;
   for(int i = 0; i<N; i++){
     for(int j=0; j<N; j++){
       if(i!=j){
-        if(A_max<A(i,j)){
-          A_max = A(i,j);
-          k = i;
-          l = j;
+        if(A_max<fabs(A(i,j))){
+          A_max = fabs(A(i,j));
+          *k = i;
+          *l = j;
         }
       }
     }
   }
-  return A_max,k,l;
+  return A_max;
 }
 //this function changes the elements in the matrix
-void jacobi_method(mat A, int k, int l){
+void jacobi_method(mat A, int k, int l, int N){
   double tau = (A(l,l)- A(k, k))/2*A(k,l);
   double t;
-  if(tau > 0){
+  if(tau >= 0){
     t = 1.0/(tau + sqrt(1.0 + tau*tau));
   }
   else{
@@ -47,25 +46,27 @@ void jacobi_method(mat A, int k, int l){
   double c = 1/sqrt(1 + t*t);
   double s = t*c;
   double Akk = A(k, k); //so that we can use it further
-  double All = A(l,l),
+  double All = A(l,l);
   A(k, k) = Akk*c*c - 2*A(k, l)*c*s + All*s*s;
   A(l, l) = All*c*c - 2*A(k, l)*c*s + Akk*s*s;
   A(k, l) = 0;
   A(l, k) = 0;
-  for(i = 0; i < N, i++){
-  if(i != k && i != l){
-    double Aik, Ail
-    A(i, k) = Aik
-    A(i, l) = Ail
-    A(i, k) = Aik*c - Ail*s
-    A(i, l) = Ail*c + Aik*s
-  }
+  for(int i = 0; i < N; i++){
+    if(i != k && i != l){
+      double Aik, Ail;
+      A(i, k) = Aik;
+      A(i, l) = Ail;
+      A(i, k) = Aik*c - Ail*s;
+      A(i, l) = Ail*c + Aik*s;
+      A(l, i) = A(i, l);
+      A(k, i) = A(i, k);
+    }
   }
   return;
 }
 
 int main(int argc, char *argv[]){
-  int N = 100;
+  int N = 3;
   mat A = zeros<mat>(N,N);
   double h = 1.0/(double) N; //rho_N = 1 rho_0 = 0
   double hh = h*h;
@@ -84,11 +85,13 @@ int main(int argc, char *argv[]){
 
   //doing the jacobimethod multiple times untill the non diagonal elements are close enough to zero
   int counter = 0;
-  double A_max, k, l = maxoff(A, N);
+  int k, l;
+  double A_max = maxoff(A, N, &k, &l);
 
   while(A_max > 1e-8){
-    double A_max, k, l = maxoff(A, N);
-    jacobi_method(A, k, l);
+    double A_max = maxoff(A, N, &k, &l);
+    jacobi_method(A, k, l, N);
+    cout<<"Amax " << A_max << endl;
     counter++;
   }
   cout<<"number of iterations needed: "<< counter <<endl;
