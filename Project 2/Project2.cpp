@@ -34,8 +34,8 @@ double maxoff(mat A, int N, int * k, int * l ){
   return A_max;
 }
 //this function changes the elements in the matrix
-void jacobi_method(mat A, int k, int l, int N){
-  double tau = (A(l,l)- A(k, k))/2*A(k,l);
+mat jacobi_method(mat A, int k, int l, int N){
+  double tau = (A(l,l)- A(k, k))/(2*A(k,l));
   double t;
   if(tau >= 0){
     t = 1.0/(tau + sqrt(1.0 + tau*tau));
@@ -44,25 +44,24 @@ void jacobi_method(mat A, int k, int l, int N){
     t = - 1.0/(-tau + sqrt(1.0 + tau*tau));
   }
   double c = 1/sqrt(1 + t*t);
-  double s = t*c;
+  double s = c*t;
   double Akk = A(k, k); //so that we can use it further
   double All = A(l,l);
   A(k, k) = Akk*c*c - 2*A(k, l)*c*s + All*s*s;
-  A(l, l) = All*c*c - 2*A(k, l)*c*s + Akk*s*s;
+  A(l, l) = All*c*c + 2*A(k, l)*c*s + Akk*s*s;
   A(k, l) = 0;
   A(l, k) = 0;
   for(int i = 0; i < N; i++){
     if(i != k && i != l){
-      double Aik, Ail;
-      A(i, k) = Aik;
-      A(i, l) = Ail;
+      double Aik = A(i, k);
+      double Ail = A(i, l);
       A(i, k) = Aik*c - Ail*s;
       A(i, l) = Ail*c + Aik*s;
       A(l, i) = A(i, l);
       A(k, i) = A(i, k);
     }
   }
-  return;
+  return A;
 }
 
 int main(int argc, char *argv[]){
@@ -89,11 +88,12 @@ int main(int argc, char *argv[]){
   double A_max = maxoff(A, N, &k, &l);
 
   while(A_max > 1e-8){
-    double A_max = maxoff(A, N, &k, &l);
-    jacobi_method(A, k, l, N);
-    cout<<"Amax " << A_max << endl;
+    A_max = maxoff(A, N, &k, &l);
+    A = jacobi_method(A, k, l, N);
+    A.print("A= ");
     counter++;
   }
+  A.print("A= ");
   cout<<"number of iterations needed: "<< counter <<endl;
   return 0;
 }
