@@ -7,7 +7,7 @@
 #include <string>
 #include <armadillo>
 
-#include "Project2.h"
+//#include "Project2.h"
 
 using namespace std;
 using namespace arma;
@@ -21,7 +21,7 @@ vec analytic_eigvals(int N,double d,double a){ //making a function for finding t
 }
 
 //finds the largest of the non-diagonal elements and the position for this
-double maxoff(mat A, int N, int * k, int * l ){
+double maxoff(mat &A, int N, int * k, int * l ){
   double A_max = 0.;
   for(int i = 0; i<N; i++){
     for(int j=0; j<N; j++){
@@ -36,8 +36,9 @@ double maxoff(mat A, int N, int * k, int * l ){
   }
   return A_max;
 }
+
 //this function changes the elements in the matrix
-mat jacobi_method(mat A, int k, int l, int N){
+void jacobi_method(mat &A, int k, int l, int N){
   double tau = (A(l,l)- A(k, k))/(2*A(k,l));
   double t;
   if(tau >= 0){
@@ -64,26 +65,36 @@ mat jacobi_method(mat A, int k, int l, int N){
       A(k, i) = A(i, k);
     }
   }
-  return A;
 }
+
 //doing the jacobimethod multiple times untill the non diagonal elements are close enough to zero
-mat iterative(mat A, int N, int k, int l){
+//overwirtes matrix A
+void iterative(mat &A, int N){
   int counter = 0;
-  //int k, l;
+  int k, l;
   double A_max = maxoff(A, N, &k, &l);
 
   while(A_max > 1e-8){
     A_max = maxoff(A, N, &k, &l);
-    A = jacobi_method(A, k, l, N);
+    jacobi_method(A, k, l, N);
     counter++;
   }
-  A.print("A= ");
+  A.print("A = ");
   cout<<"number of iterations needed: "<< counter <<endl;
-  return A;
 }
 
-mat initialize(){
-  int N = 3;
+//Returns a sorted vector of the diagonal elements
+vec get_eigvals(mat &A, int N){
+   vec eigvals = zeros<vec>(N);
+   for(int i = 0;i<N; i++){
+     eigvals(i) = A(i,i);
+   }
+   eigvals = sort(eigvals);
+   eigvals.print("Eigenvalues (Jacobi) = ");
+   return eigvals;
+}
+
+mat initialize(int N){
   mat A = zeros<mat>(N,N);
   double h = 1.0/(double) N; //rho_N = 1 rho_0 = 0
   double hh = h*h;
@@ -98,19 +109,20 @@ mat initialize(){
   return A;
 }
 
-int main(){
-  mat A = initialize();
-  int N = 3;
-  double h = 1.0/3; //rho_N = 1 rho_0 = 0
+int main(int argc, char *argv[]){
+  int N = atof(argv[1]);
+  mat A = initialize(N);
+  double h = 1.0/N; //rho_N = 1 rho_0 = 0
   double hh = h*h;
   double d = 2.0/hh; //diagonal elements
   double a = -1/hh;
-  vec eigvals = eig_sym(A);
-  eigvals.print("eigvals = ");
-  vec eigvals_a = analytic_eigvals(3,d,a);
-  eigvals_a.print("Analytical eigenvalues = ");
-  int k;
-  int l;
-  double A_max = maxoff(A, N, &k, &l);
-  mat B = initerative(A, N, k, l);
+
+  vec eigenvalues_arma = eig_sym(A);
+  eigenvalues_arma.print("Eigenvalues (from armadillo) = ");
+
+  vec eigenvalues_analytical = analytic_eigvals(N,d,a);
+  eigenvalues_analytical.print("Analytical eigenvalues = ");
+
+  iterative(A, N);
+  vec eigenvalues = get_eigvals(A,N);
 }
