@@ -38,7 +38,7 @@ double maxoff(mat &A, int N, int * k, int * l ){
 }
 
 //this function changes the elements in the matrix
-void jacobi_method(mat &A, int k, int l, int N){
+void jacobi_method(mat &A, mat &R, int k, int l, int N){
   double tau = (A(l,l)- A(k, k))/(2*A(k,l));
   double t;
   if(tau >= 0){
@@ -63,23 +63,28 @@ void jacobi_method(mat &A, int k, int l, int N){
       A(i, l) = Ail*c + Aik*s;
       A(l, i) = A(i, l);
       A(k, i) = A(i, k);
+
+      //Rotating the eigenvector matrix
     }
+    double Rik = R(i,k);
+    double Ril = R(i,l);
+    R(i, k) = Rik*c - Ril*s;
+    R(i, l) = Ril*c + Rik*s;
   }
 }
 
 //doing the jacobimethod multiple times untill the non diagonal elements are close enough to zero
 //overwirtes matrix A
-void iterative(mat &A, int N){
+void iterative(mat &A, mat &R, int N){
   int counter = 0;
   int k, l;
   double A_max = maxoff(A, N, &k, &l);
 
   while(A_max > 1e-8){
     A_max = maxoff(A, N, &k, &l);
-    jacobi_method(A, k, l, N);
+    jacobi_method(A, R, k, l, N);
     counter++;
   }
-  A.print("A = ");
   cout<<"number of iterations needed: "<< counter <<endl;
 }
 
@@ -90,7 +95,6 @@ vec get_eigvals(mat &A, int N){
      eigvals(i) = A(i,i);
    }
    eigvals = sort(eigvals);
-   eigvals.print("Eigenvalues (Jacobi) = ");
    return eigvals;
 }
 
@@ -112,6 +116,7 @@ mat initialize(int N){
 int main(int argc, char *argv[]){
   int N = atof(argv[1]);
   mat A = initialize(N);
+  mat R(N,N,fill::eye);
   double h = 1.0/N; //rho_N = 1 rho_0 = 0
   double hh = h*h;
   double d = 2.0/hh; //diagonal elements
@@ -123,6 +128,8 @@ int main(int argc, char *argv[]){
   vec eigenvalues_analytical = analytic_eigvals(N,d,a);
   eigenvalues_analytical.print("Analytical eigenvalues = ");
 
-  iterative(A, N);
-  vec eigenvalues = get_eigvals(A,N);
+  iterative(A,R,N);
+  vec eigenvalues_Jacobi = get_eigvals(A,N);
+  eigenvalues_Jacobi.print("Eigenvalues (Jacobi) = ");
+  R.print("R = ");
 }
