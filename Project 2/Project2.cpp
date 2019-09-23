@@ -7,7 +7,7 @@
 #include <string>
 #include <armadillo>
 
-//#include "Project2.h"
+#include "Project2.h"
 
 using namespace std;
 using namespace arma;
@@ -98,38 +98,49 @@ vec get_eigvals(mat &A, int N){
    return eigvals;
 }
 
-mat initialize(int N){
+mat initialize(int N, double max, bool potential){
   mat A = zeros<mat>(N,N);
-  double h = 1.0/(double) N; //rho_N = 1 rho_0 = 0
+  double *rho = new double[N];
+  double *d = new double[N-1];
+  rho[N] = max;
+  double h = rho[N]/(double) N; //rho_N = max  rho_0 = 0
   double hh = h*h;
-  double d = 2.0/hh; //diagonal elements
   double a = -1/hh;
+  //this will only work if we have a potential, need to figure out for no potential
+  for(int i = 0; i <= N-1; i++){
+    if(potential == true){
+      rho[i] = i*h;
+    }
+    else{
+      rho[i] = 0;
+    }
+      d[i] = 2.0/hh + rho[i]*rho[i]; //diagonal elements
+    }
 
   for (int i = 0; i < N-1; i++){ //making the tridiagonal matrix
-    A(i,i) = d;
+    A(i,i) = d[i];
     A(i,i+1) = A(i+1,i) = a;
   }
-  A(N-1,N-1) = 2.0/hh; //setting last diagonal element, as for loop does not go this far
+  A(N-1,N-1) = d[N-1]; //setting last diagonal element, as for loop does not go this far
   return A;
 }
 
 int main(int argc, char *argv[]){
   int N = atof(argv[1]);
-  mat A = initialize(N);
+  double max = 10.0; //when we dont have a potential rho[N] = 1
+  mat A = initialize(N, max, true);
   mat R(N,N,fill::eye);
   double h = 1.0/N; //rho_N = 1 rho_0 = 0
   double hh = h*h;
   double d = 2.0/hh; //diagonal elements
   double a = -1/hh;
-
+  //A.print("A = ");
   vec eigenvalues_arma = eig_sym(A);
   eigenvalues_arma.print("Eigenvalues (from armadillo) = ");
-
-  vec eigenvalues_analytical = analytic_eigvals(N,d,a);
-  eigenvalues_analytical.print("Analytical eigenvalues = ");
-
+//  vec eigenvalues_analytical = analytic_eigvals(N,d,a); //this only shows the eigenvalues with no potential
+//  eigenvalues_analytical.print("Analytical eigenvalues = ");
   iterative(A,R,N);
   vec eigenvalues_Jacobi = get_eigvals(A,N);
   eigenvalues_Jacobi.print("Eigenvalues (Jacobi) = ");
-  R.print("R = ");
+//  R.print("R = ");
 }
