@@ -14,10 +14,10 @@ using namespace std;
 using namespace arma;
 
 vec analytic_eigvals(int,double,double);
-double maxoff(mat&, int, int *, int *);
+double maxoff(mat&, mat&, int, int *, int *);
 void jacobi_method(mat&, int, int, int);
-void iterative(mat&, int);
-mat initialize(int);
+void iterative(mat&, mat&, int);
+mat initialize(int, double, bool);
 vec get_eigvals(mat&, int);
 
 #endif
