@@ -9,6 +9,7 @@
 
 #include "Project2.h"
 
+std::ofstream ofile;
 using namespace std;
 using namespace arma;
 
@@ -35,6 +36,27 @@ double maxoff(mat &A, int N, int * k, int * l ){
     }
   }
   return A_max;
+}
+
+//prints results to file
+void print_file(mat& R, vec& lambda, int N){
+    string outfilename;
+    string number = to_string(N);
+    cout << number << endl;
+
+    outfilename = "eigenvectors_"+number+".txt";
+    ofile.open(outfilename);
+    ofile << showpoint << setprecision(6) << setw(6) << "eigenvectors (coloumn format)" << endl;
+    ofile << "------------------------------" << endl;
+    R.print(ofile);
+    ofile.close();
+
+    outfilename = "eigenvalues_"+number+".txt";
+    ofile.open(outfilename);
+    ofile << showpoint << setprecision(6) << setw(6) << "eigenvalues (corresponds to columns in 'eigenvectors_*_.txt')" << endl;
+    ofile << "------------------------------" << endl;
+    lambda.print(ofile);
+    ofile.close();
 }
 
 //this function changes the elements in the matrix
@@ -101,9 +123,9 @@ vec get_eigvals(mat &A, int N){
 mat initialize(int N, double max, bool potential){
   mat A = zeros<mat>(N,N);
   double *rho = new double[N];
-  double *d = new double[N-1];
-  rho[N] = max;
-  double h = rho[N]/(double) N; //rho_N = max  rho_0 = 0
+  double *d = new double[N];
+  rho[N-1] = max;
+  double h = rho[N-1]/(double) N; //rho_N = max  rho_0 = 0
   double hh = h*h;
   double a = -1/hh;
   //this will only work if we have a potential, need to figure out for no potential
@@ -122,6 +144,10 @@ mat initialize(int N, double max, bool potential){
     A(i,i+1) = A(i+1,i) = a;
   }
   A(N-1,N-1) = d[N-1]; //setting last diagonal element, as for loop does not go this far
+
+  //delete unneeded arrays
+  delete [] rho;
+  delete [] d;
   return A;
 }
 
@@ -142,5 +168,6 @@ int main(int argc, char *argv[]){
   iterative(A,R,N);
   vec eigenvalues_Jacobi = get_eigvals(A,N);
   eigenvalues_Jacobi.print("Eigenvalues (Jacobi) = ");
-//  R.print("R = ");
+  //R.print("R = ");
+  print_file(R,eigenvalues_Jacobi,N);
 }
