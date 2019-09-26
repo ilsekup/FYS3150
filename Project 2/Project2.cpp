@@ -21,7 +21,7 @@ vec analytic_eigvals(int N,double d,double a){ //making a function for finding t
   return temp;
 }
 
-//finds the largest of the non-diagonal elements and the position for this
+//finds the largest of the non-diagonal elements in A and the position for this element
 double maxoff(mat &A, int N, int * k, int * l ){
   double A_max = 0.;
   for(int i = 0; i<N; i++){
@@ -38,8 +38,8 @@ double maxoff(mat &A, int N, int * k, int * l ){
   return A_max;
 }
 
-//prints results to file
-void print_file(mat& R, vec& lambda, int N){
+//prints eigenvectors (R) and eigenvalues (lambda) to files
+void print_file(mat& R, vec& lambdas, int N){
     string outfilename;
     string number = to_string(N);
     cout << number << endl;
@@ -55,11 +55,12 @@ void print_file(mat& R, vec& lambda, int N){
     ofile.open(outfilename);
     ofile << showpoint << setprecision(6) << setw(6) << "eigenvalues (corresponds to columns in 'eigenvectors_*_.txt')" << endl;
     ofile << "------------------------------" << endl;
-    lambda.print(ofile);
+    lambdas.print(ofile);
     ofile.close();
 }
 
-//this function changes the elements in the matrix
+//Preforms one step of the Jacobi algorithm
+//this function changes the elements in the matrices A and R
 void jacobi_method(mat &A, mat &R, int k, int l, int N){
   double tau = (A(l,l)- A(k, k))/(2*A(k,l));
   double t;
@@ -110,16 +111,31 @@ void iterative(mat &A, mat &R, int N){
   cout<<"number of iterations needed: "<< counter <<endl;
 }
 
-//Returns a sorted vector of the diagonal elements
+//Returns a vector of the diagonal elements of matrix A
 vec get_eigvals(mat &A, int N){
-   vec eigvals = zeros<vec>(N);
+   vec lambdas = zeros<vec>(N);
    for(int i = 0;i<N; i++){
-     eigvals(i) = A(i,i);
+     lambdas(i) = A(i,i);
    }
-   eigvals = sort(eigvals);
-   return eigvals;
+   //eigvals = sort(eigvals);
+   return lambdas;
 }
 
+//Sorts a matrix R containing the eigenvectors, and a vector lambdas containing the eigenvalues
+//overwirtes R and lambdas with sorted versions
+void sort_eigenproblem(mat &R, vec &lambda, int N){
+  vec lambda_new = sort(lambda);
+  mat R_new = zeros<mat>(N,N);
+  ucolvec ind;
+  for(int i=0; i<N; i++){
+    ind = find(lambda==lambda_new(i));
+    R_new.col(i) = R.col(ind(0));
+  }
+  R = R_new;
+  lambda = lambda_new;
+}
+
+//Returns the tridiagonal matrix A needed to solve the boundary problem
 mat initialize(int N, double max, bool potential){
   mat A = zeros<mat>(N,N);
   double *rho = new double[N];
@@ -151,6 +167,7 @@ mat initialize(int N, double max, bool potential){
   return A;
 }
 
+
 int main(int argc, char *argv[]){
   int N = atof(argv[1]);
   double max = 10.0; //when we dont have a potential rho[N] = 1
@@ -161,13 +178,16 @@ int main(int argc, char *argv[]){
   double d = 2.0/hh; //diagonal elements
   double a = -1/hh;
   //A.print("A = ");
-  vec eigenvalues_arma = eig_sym(A);
+  vec eigenvalues_arma;
+  mat eigenvectors_arma;
+  eig_sym(eigenvalues_arma, eigenvectors_arma,A);
   eigenvalues_arma.print("Eigenvalues (from armadillo) = ");
 //  vec eigenvalues_analytical = analytic_eigvals(N,d,a); //this only shows the eigenvalues with no potential
 //  eigenvalues_analytical.print("Analytical eigenvalues = ");
+  //solve iteratively with Jacobi
   iterative(A,R,N);
   vec eigenvalues_Jacobi = get_eigvals(A,N);
-  eigenvalues_Jacobi.print("Eigenvalues (Jacobi) = ");
-  //R.print("R = ");
+  sort_eigenproblem(R,eigenvalues_Jacobi,N);
   print_file(R,eigenvalues_Jacobi,N);
 }
+
