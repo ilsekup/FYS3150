@@ -1,0 +1,51 @@
+//Lanczos'-methods
+#include <iostream>
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include "time.h"
+#include <string>
+#include <armadillo>
+
+using namespace std;
+using namespace arma;
+
+vec analytic_eigvals(int N,double d,double a){ //making a function for finding the analytical eigenvalues given in exercise
+  vec temp = zeros<vec>(N);
+  for(int i = 0;i < N; i++){
+    temp(i) = d + 2*a*cos((i+1)*M_PI/(N+1));
+  }
+  return temp;
+}
+
+mat QR(mat &A, int k){ // K is the number of times we run the QR-factorization on mat A
+// QR-factorization of tridiagonal matrix A, k-times
+mat Q,R;
+for(int i = 0; i < k; i++){
+  qr_econ(Q,R,A); // returns Q and R matrix that make A
+  A = R*Q;
+}
+return A;
+}
+
+int main(int argc, char *argv[]){
+  int N = 3;
+  mat A = zeros<mat>(N,N);
+  double h = 1.0/(double) N; //rho_N = 1 rho_0 = 0
+  double hh = h*h;
+  double d = 2.0/hh; //diagonal elements
+  double a = -1/hh;
+
+  for (int i = 0; i < N-1; i++){ //making the tridiagonal matrix
+    A(i,i) = d;
+    A(i,i+1) = A(i+1,i) = a;
+  }
+  A(N-1,N-1) = 2.0/hh; //setting last diagonal element, as for loop does not go this far
+
+mat T = QR(A,20);
+vec temp = analytic_eigvals(3, d, a);
+cout << T << "eigvals along diagonal" << endl;
+cout << temp << endl;
+return 0;
+}
