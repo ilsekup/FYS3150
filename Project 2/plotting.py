@@ -20,6 +20,16 @@ for num,i in enumerate(lines): #putting everything in the right list
     eigvects[num,:] = [float(txt) for txt in text]
 fil.close()
 
-rho = np.linspace(0,1,N)
-plt.plot(rho,eigvects[:,31])
+rho = np.linspace(0,10,N)
+
+#Plots the eigenvectors for these eigenvalues (indexed by number)
+n_plot = [0,1,2]
+
+plt.figure()
+plt.xlabel(r"$\rho$")
+plt.ylabel(r"$u(\rho)$")
+
+for n in n_plot:
+    plt.plot(rho,eigvects[:,n],label = r"$\lambda_%i$"%(n))
+plt.legend()
 plt.show()
