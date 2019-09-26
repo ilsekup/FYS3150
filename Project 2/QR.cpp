@@ -19,15 +19,17 @@ vec analytic_eigvals(int N,double d,double a){ //making a function for finding t
   return temp;
 }
 
-mat QR(mat &A, int k){ // K is the number of times we run the QR-factorization on mat A
+// K is the number of times we run the QR-factorization on mat A
 // QR-factorization of tridiagonal matrix A, k-times
-mat Q,R;
-for(int i = 0; i < k; i++){
-  qr_econ(Q,R,A); // returns Q and R matrix that make A
-  A = R*Q;  // Q^-1 * A * Q = A_1 = R*Q, rinse and repeat for A_k
+mat QR(mat &A, int k){
+  mat Q,R;
+  for(int i = 0; i < k; i++){
+    qr_econ(Q,R,A); // returns Q and R matrix that make A
+    A = R*Q;  // Q^-1 * A * Q = A_1 = R*Q, rinse and repeat for A_k
+  }
+  return A;
 }
-return A;
-}
+
 // borrowed some main code to make tri-diag. matrix and test QR-algo.
 int main(int argc, char *argv[]){
   int N = 3;
@@ -43,9 +45,9 @@ int main(int argc, char *argv[]){
   }
   A(N-1,N-1) = 2.0/hh; //setting last diagonal element, as for loop does not go this far
 
-mat T = QR(A,20);
-vec temp = analytic_eigvals(3, d, a);
-cout << T << "eigvals along diagonal" << endl;
-cout << temp << endl;
-return 0;
+  mat T = QR(A,20);
+  vec temp = analytic_eigvals(N, d, a);
+  cout << T << "eigvals along diagonal" << endl;
+  cout << temp << endl;
+  return 0;
 }

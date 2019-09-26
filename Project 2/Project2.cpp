@@ -87,7 +87,7 @@ void jacobi_method(mat &A, mat &R, int k, int l, int N){
       A(l, i) = A(i, l);
       A(k, i) = A(i, k);
 
-      //Rotating the eigenvector matrix
+    //Rotating the eigenvector matrix
     }
     double Rik = R(i,k);
     double Ril = R(i,l);
