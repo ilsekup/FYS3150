@@ -53,38 +53,47 @@ void QR(mat &A, int k){
   }
 }
 
-void Lanczos(mat &A,int N){
-  mat Q = randu<mat>(N,N);
-  vec alpha = zeros<vec>(N);
+mat Lanczos(mat &A,int N, int m){
+  mat Q = randu<mat>(N,m);
+  mat T = zeros<mat>(m,m);
+  vec alpha = zeros<vec>(m);
   vec r = zeros<vec>(N);
   int k = 0;
-  vec beta = ones<vec>(N);
+  vec beta = ones<vec>(m);
   Q.col(0) /= norm(Q.col(0),2);
   r = Q.col(0);
   alpha(0) = dot(Q.col(0).t(),A*Q.col(0));
-  while(beta(k) != 0 && k < N-1){
+  while(beta(k)!=0 && k<m-1){
     Q.col(k+1) = r/beta(k);
-    k++;
+    k+=1;
     alpha(k) = dot(Q.col(k).t(),A*Q.col(k));
     r = (A - alpha(k)*eye<mat>(N,N))*Q.col(k) - beta(k-1)*Q.col(k-1);
     beta(k) = norm(r,2);
   }
-  for(int i = 1;i<N;i++){
-    A(i-1,i-1) = alpha(i-1);
-    A(i,i-1) = A(i-1,i) = beta(i-1);
+  for(int i = 1;i<m;i++){
+    T(i-1,i-1) = alpha(i-1);
+    T(i,i-1) = T(i-1,i) = beta(i-1);
   }
-  A(N-1,N-1) = alpha(N-1);
-  if(k == N-1){
-    cout << "Max iterations reached!" << endl;
+  T(m-1,m-1) = alpha(m-1);
+  if(k == m-1){
+    cout << "Max iterations reached" << endl;
   }
   else{
-    cout << "Iterations needed = " << k <<endl;
+    cout << "Norm of r was 0, aborted algorithm" << k <<endl;
   }
+  return T;
 }
 
 // borrowed some main code to make tri-diag. matrix and test QR-algo.
 int main(int argc, char *argv[]){
   int N = atof(argv[1]);
+  int m = 10;
+  if(argc<3){
+    m = N;
+  }
+  else{
+    m = atof(argv[2]);
+  }
   mat A = zeros<mat>(N,N);
   double h = 1.0/(double) N; //rho_N = 1 rho_0 = 0
   double hh = h*h;
@@ -97,13 +106,16 @@ int main(int argc, char *argv[]){
   }
   A(N-1,N-1) = 2.0/hh; //setting last diagonal element, as for loop does not go this far
 
-  Lanczos(A,N);
-  QR(A,20);
+  mat T = Lanczos(A,N,m);
+  QR(T,20);
   vec temp = analytic_eigvals(N, d, a);
-  vec eigvals_Lanczos = get_eigvals(A,N);
-  mat standin = randu<mat>(N,N);
-  sort_eigenproblem(standin,eigvals_Lanczos,N);
-  temp.print("Analytical eigenvalues = ");
+  vec eigvals_Lanczos = get_eigvals(T,m);
+  mat standin = randu<mat>(m,m);
+  sort_eigenproblem(standin,eigvals_Lanczos,m);
+  cout << "Analytical Eigenvalues = " << endl;
+  for(int i=0;i<m;i++){
+    cout << "  " << temp(i) << endl;
+  }
   eigvals_Lanczos.print("Eigenvalues Lanczos = ");
   return 0;
 }
