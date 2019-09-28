@@ -9,10 +9,11 @@
 
 #include "Project2.h"
 
-std::ofstream ofile;
 using namespace std;
 using namespace arma;
 
+
+//analytic eigenvalues for the buckling beam
 vec analytic_eigvals(int N,double d,double a){ //making a function for finding the analytical eigenvalues given in exercise
   vec temp = zeros<vec>(N);
   for(int i = 0;i < N; i++){
@@ -21,6 +22,7 @@ vec analytic_eigvals(int N,double d,double a){ //making a function for finding t
   return temp;
 }
 
+//analytic eigenvlaues for the harmonic oscillator
 vec analytic_eigvals_harmonic(int N){
   vec temp = zeros<vec>(N);
   for(int i = 0; i < N; i++){
@@ -68,7 +70,8 @@ void print_file(mat& R, vec& lambda, double error, int N){
     ofile.close();
 }
 
-//this function changes the elements in the matrix
+//Preforms one step of the Jacobi algorithm
+//this function changes the elements in the matrices A and R
 void jacobi_method(mat &A, mat &R, int k, int l, int N){
   double tau = (A(l,l)- A(k, k))/(2*A(k,l));
   double t;
@@ -95,7 +98,7 @@ void jacobi_method(mat &A, mat &R, int k, int l, int N){
       A(l, i) = A(i, l);
       A(k, i) = A(i, k);
 
-      //Rotating the eigenvector matrix
+    //Rotating the eigenvector matrix
     }
     double Rik = R(i,k);
     double Ril = R(i,l);
@@ -119,16 +122,17 @@ void iterative(mat &A, mat &R, int N){
   cout<<"number of iterations needed: "<< counter <<endl;
 }
 
-//Returns a sorted vector of the diagonal elements
+//Returns a vector of the diagonal elements of matrix A
 vec get_eigvals(mat &A, int N){
-   vec eigvals = zeros<vec>(N);
+   vec lambdas = zeros<vec>(N);
    for(int i = 0;i<N; i++){
-     eigvals(i) = A(i,i);
+     lambdas(i) = A(i,i);
    }
-   eigvals = sort(eigvals);
-   return eigvals;
+   //eigvals = sort(eigvals);
+   return lambdas;
 }
 
+//Finds the error between the analytical and computed eigenvalues for the first 20 eigenvalues
 double get_error(vec analytical, vec eigenvals, int N){
   vec error = zeros<vec>(N);
     for(int i= 0; i < 20; i++){
@@ -143,6 +147,22 @@ double get_error(vec analytical, vec eigenvals, int N){
   double average_error = accu(error)/N;
   return average_error;
 }
+
+//Sorts a matrix R containing the eigenvectors, and a vector lambdas containing the eigenvalues
+//overwirtes R and lambdas with sorted versions
+void sort_eigenproblem(mat &R, vec &lambda, int N){
+  vec lambda_new = sort(lambda);
+  mat R_new = zeros<mat>(N,N);
+  ucolvec ind;
+  for(int i=0; i<N; i++){
+    ind = find(lambda==lambda_new(i));
+    R_new.col(i) = R.col(ind(0));
+  }
+  R = R_new;
+  lambda = lambda_new;
+}
+
+//Returns the tridiagonal matrix A needed to solve the boundary problem
 
 mat initialize(int N, double max, bool potential){
   mat A = zeros<mat>(N,N);
@@ -175,3 +195,5 @@ mat initialize(int N, double max, bool potential){
   delete [] d;
   return A;
 }
+
+//the main function is a different file to avoid conflict when compiling the test functions
