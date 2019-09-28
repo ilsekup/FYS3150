@@ -21,6 +21,14 @@ vec analytic_eigvals(int N,double d,double a){ //making a function for finding t
   return temp;
 }
 
+vec analytic_eigvals_harmonic(int N){
+  vec temp = zeros<vec>(N);
+  for(int i = 0; i < N; i++){
+    temp(i) = 3 + 4*i;
+  }
+  return temp;
+}
+
 //finds the largest of the non-diagonal elements and the position for this
 double maxoff(mat &A, int N, int * k, int * l ){
   double A_max = 0.;
@@ -39,20 +47,21 @@ double maxoff(mat &A, int N, int * k, int * l ){
 }
 
 //prints results to file
-void print_file(mat& R, vec& lambda, int N){
+void print_file(mat& R, vec& lambda, double error, int N){
     string outfilename;
     string number = to_string(N);
     cout << number << endl;
 
-    outfilename = "eigenvectors_"+number+".txt";
+    outfilename = "eigenvectors_nopot"+number+".txt";
     ofile.open(outfilename);
     ofile << showpoint << setprecision(6) << setw(6) << "eigenvectors (coloumn format)" << endl;
     ofile << "------------------------------" << endl;
     R.print(ofile);
     ofile.close();
 
-    outfilename = "eigenvalues_"+number+".txt";
+    outfilename = "eigenvalues_nopot"+number+".txt";
     ofile.open(outfilename);
+    ofile << "average error: " << error << endl;
     ofile << showpoint << setprecision(6) << setw(6) << "eigenvalues (corresponds to columns in 'eigenvectors_*_.txt')" << endl;
     ofile << "------------------------------" << endl;
     lambda.print(ofile);
@@ -120,6 +129,21 @@ vec get_eigvals(mat &A, int N){
    return eigvals;
 }
 
+double get_error(vec analytical, vec eigenvals, int N){
+  vec error = zeros<vec>(N);
+    for(int i= 0; i < 20; i++){
+      if(N >=20){
+      //  error(i) = analytical(i) - eigenvals(i);
+      error(i) = fabs((eigenvals[i] - analytical[i])/analytical[i]);
+    }
+    else{
+      break;
+  }
+  }
+  double average_error = accu(error)/N;
+  return average_error;
+}
+
 mat initialize(int N, double max, bool potential){
   mat A = zeros<mat>(N,N);
   double *rho = new double[N];
@@ -128,6 +152,7 @@ mat initialize(int N, double max, bool potential){
   double h = rho[N-1]/(double) N; //rho_N = max  rho_0 = 0
   double hh = h*h;
   double a = -1/hh;
+
   //this will only work if we have a potential, need to figure out for no potential
   for(int i = 0; i <= N-1; i++){
     if(potential == true){
@@ -149,25 +174,4 @@ mat initialize(int N, double max, bool potential){
   delete [] rho;
   delete [] d;
   return A;
-}
-
-int main(int argc, char *argv[]){
-  int N = atof(argv[1]);
-  double max = 10.0; //when we dont have a potential rho[N] = 1
-  mat A = initialize(N, max, true);
-  mat R(N,N,fill::eye);
-  double h = 1.0/N; //rho_N = 1 rho_0 = 0
-  double hh = h*h;
-  double d = 2.0/hh; //diagonal elements
-  double a = -1/hh;
-  //A.print("A = ");
-  vec eigenvalues_arma = eig_sym(A);
-  eigenvalues_arma.print("Eigenvalues (from armadillo) = ");
-//  vec eigenvalues_analytical = analytic_eigvals(N,d,a); //this only shows the eigenvalues with no potential
-//  eigenvalues_analytical.print("Analytical eigenvalues = ");
-  iterative(A,R,N);
-  vec eigenvalues_Jacobi = get_eigvals(A,N);
-  eigenvalues_Jacobi.print("Eigenvalues (Jacobi) = ");
-  //R.print("R = ");
-  print_file(R,eigenvalues_Jacobi,N);
 }
