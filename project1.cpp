@@ -209,7 +209,7 @@ int main(int argc, char *argv[]){
     }
     print_file(max_error,time_spent,v,x, outfilename,n,run_info_file);
   }
- 
+
   cout << "Max relative error = " << max_error << endl;
   cout <<"Time elapsed specialized version = " << time_spent <<" seconds" <<endl;
 
@@ -230,14 +230,14 @@ int main(int argc, char *argv[]){
     A(i+1,i) =-1;
     b_tilde2[i] = hh*f(x[i+1]);
   }
-  b_tilde2[n-1] = hh*f(x[n]); 
+  b_tilde2[n-1] = hh*f(x[n]);
   A(n-1,n-1) = 2; // setting the last corner element to -2;
-  
+
 
   start = clock();
   solution = LUdecomposition(b_tilde2, A);
   finish = clock();
-  
+
   for (int i = 0; i<n; i++){
     // transfer the numbers in the 'solution' vector to an array of floats (v)
     v[i+1] = solution[i];
