@@ -19,5 +19,8 @@ void jacobi_method(mat&, int, int, int);
 void iterative(mat&, mat&, int);
 mat initialize(int, double, bool);
 vec get_eigvals(mat&, int);
+void print_file(mat&, vec&, double, int);
+double get_error(vec, vec, int);
+vec analytic_eigvals_harmonic(int);
 
 #endif
