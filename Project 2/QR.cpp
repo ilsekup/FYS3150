@@ -53,6 +53,8 @@ void QR(mat &A, int k){
   }
 }
 
+//Proformes m step of the Lanczos method to find eigenvalues
+//Returns a tridiagonal matrix T
 mat Lanczos(mat &A,int N, int m){
   mat Q = randu<mat>(N,m);
   mat T = zeros<mat>(m,m);
@@ -60,9 +62,12 @@ mat Lanczos(mat &A,int N, int m){
   vec r = zeros<vec>(N);
   int k = 0;
   vec beta = ones<vec>(m);
+
+  //Normalizing q_0
   Q.col(0) /= norm(Q.col(0),2);
   r = Q.col(0);
   alpha(0) = dot(Q.col(0).t(),A*Q.col(0));
+  //Do m steps
   while(beta(k)!=0 && k<m-1){
     Q.col(k+1) = r/beta(k);
     k+=1;
@@ -70,6 +75,7 @@ mat Lanczos(mat &A,int N, int m){
     r = (A - alpha(k)*eye<mat>(N,N))*Q.col(k) - beta(k-1)*Q.col(k-1);
     beta(k) = norm(r,2);
   }
+  //Construct the matrix T
   for(int i = 1;i<m;i++){
     T(i-1,i-1) = alpha(i-1);
     T(i,i-1) = T(i-1,i) = beta(i-1);
@@ -106,13 +112,15 @@ int main(int argc, char *argv[]){
   }
   A(N-1,N-1) = 2.0/hh; //setting last diagonal element, as for loop does not go this far
 
+  //Preforme Lanczos on A
   mat T = Lanczos(A,N,m);
+  //Find the eigenvalues of T with the QR algorithm
   QR(T,20);
   vec temp = analytic_eigvals(N, d, a);
   vec eigvals_Lanczos = get_eigvals(T,m);
-  mat standin = randu<mat>(m,m);
+  mat standin = randu<mat>(m,m);//dummy matrix passed to sort to get eigenvalues
   sort_eigenproblem(standin,eigvals_Lanczos,m);
-  cout << "Analytical Eigenvalues = " << endl;
+  cout << "Analytical Eigenvalues (" << m <<" first) = " << endl;
   for(int i=0;i<m;i++){
     cout << "  " << temp(i) << endl;
   }
