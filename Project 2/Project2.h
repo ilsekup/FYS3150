@@ -10,7 +10,7 @@
 #include <string>
 #include <armadillo>
 
-std::ofstream ofile;
+
 using namespace std;
 using namespace arma;
 
@@ -19,10 +19,9 @@ double maxoff(mat&, mat&, int, int *, int *);
 void jacobi_method(mat&, int, int, int);
 void iterative(mat&, mat&, int);
 mat initialize(int, double, bool);
-vec get_eigvals(mat&, int);
 void print_file(mat&, vec&, double, int);
 double get_error(vec, vec, int);
 vec analytic_eigvals_harmonic(int);
-void sort_eigenproblem(mat &, vec &, int);
+vec sort_eigenproblem(mat &, mat &, int);
 
 #endif
