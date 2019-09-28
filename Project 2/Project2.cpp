@@ -50,6 +50,7 @@ double maxoff(mat &A, int N, int * k, int * l ){
 
 //prints results to file
 void print_file(mat& R, vec& lambda, double error, int N){
+    std::ofstream ofile;
     string outfilename;
     string number = to_string(N);
     cout << number << endl;
@@ -122,22 +123,12 @@ void iterative(mat &A, mat &R, int N){
   cout<<"number of iterations needed: "<< counter <<endl;
 }
 
-//Returns a vector of the diagonal elements of matrix A
-vec get_eigvals(mat &A, int N){
-   vec lambdas = zeros<vec>(N);
-   for(int i = 0;i<N; i++){
-     lambdas(i) = A(i,i);
-   }
-   //eigvals = sort(eigvals);
-   return lambdas;
-}
 
 //Finds the error between the analytical and computed eigenvalues for the first 20 eigenvalues
 double get_error(vec analytical, vec eigenvals, int N){
   vec error = zeros<vec>(N);
     for(int i= 0; i < 20; i++){
       if(N >=20){
-      //  error(i) = analytical(i) - eigenvals(i);
       error(i) = fabs((eigenvals[i] - analytical[i])/analytical[i]);
     }
     else{
@@ -148,18 +139,24 @@ double get_error(vec analytical, vec eigenvals, int N){
   return average_error;
 }
 
+//Returns a vector of the diagonal elements of matrix A
 //Sorts a matrix R containing the eigenvectors, and a vector lambdas containing the eigenvalues
 //overwirtes R and lambdas with sorted versions
-void sort_eigenproblem(mat &R, vec &lambda, int N){
-  vec lambda_new = sort(lambda);
+vec sort_eigenproblem(mat &A, mat &R, int N){
+  vec lambdas = zeros<vec>(N);
+  for(int i = 0;i<N; i++){
+    lambdas(i) = A(i,i);
+  }
+  vec lambda_new = sort(lambdas);
   mat R_new = zeros<mat>(N,N);
   ucolvec ind;
   for(int i=0; i<N; i++){
-    ind = find(lambda==lambda_new(i));
+    ind = find(lambdas==lambda_new(i));
     R_new.col(i) = R.col(ind(0));
   }
   R = R_new;
-  lambda = lambda_new;
+  lambdas = lambda_new;
+  return lambdas;
 }
 
 //Returns the tridiagonal matrix A needed to solve the boundary problem
