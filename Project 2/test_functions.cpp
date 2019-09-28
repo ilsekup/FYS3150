@@ -8,7 +8,7 @@ TEST_CASE("Testing Eigenvalues"){
   mat A = initialize(N, max, potential);
   mat R(N,N,fill::eye);
   iterative(A, R, N);
-  vec eigen = get_eigvals(A, N);
+  vec eigen = sort_eigenproblem(A, R, N);
   REQUIRE(eigen(0) ==Approx(6.1115));
   REQUIRE(eigen(1) == Approx(22.1115));
   REQUIRE(eigen(2) == Approx(41.8885));
