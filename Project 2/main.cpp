@@ -9,6 +9,7 @@
 #include "Project2.h"
 #include "Project2.cpp"
 
+
 int main(int argc, char *argv[]){
   using namespace std;
   using namespace arma;
