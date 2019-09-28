@@ -10,6 +10,7 @@
 #include <string>
 #include <armadillo>
 
+std::ofstream ofile;
 using namespace std;
 using namespace arma;
 
@@ -22,5 +23,6 @@ vec get_eigvals(mat&, int);
 void print_file(mat&, vec&, double, int);
 double get_error(vec, vec, int);
 vec analytic_eigvals_harmonic(int);
+void sort_eigenproblem(mat &, vec &, int);
 
 #endif
