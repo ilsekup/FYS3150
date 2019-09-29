@@ -55,14 +55,14 @@ void print_file(mat& R, vec& lambda, double error, int N){
     string number = to_string(N);
     cout << number << endl;
 
-    outfilename = "eigenvectors_nopot"+number+".txt";
+    outfilename = "eigenvectors_"+number+".txt";
     ofile.open(outfilename);
     ofile << showpoint << setprecision(6) << setw(6) << "eigenvectors (coloumn format)" << endl;
     ofile << "------------------------------" << endl;
     R.print(ofile);
     ofile.close();
 
-    outfilename = "eigenvalues_nopot"+number+".txt";
+    outfilename = "eigenvalues_"+number+".txt";
     ofile.open(outfilename);
     ofile << "average error: " << error << endl;
     ofile << showpoint << setprecision(6) << setw(6) << "eigenvalues (corresponds to columns in 'eigenvectors_*_.txt')" << endl;
