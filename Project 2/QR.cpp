@@ -90,10 +90,32 @@ mat Lanczos(mat &A,int N, int m){
   return T;
 }
 
+//Prints eigenvalues to file, and stores which k and N values has been run,
+//in order to plot all results
+void print_file(vec& lambdas, int N, int k){
+    std::ofstream ofile;
+    string outfilename;
+    string number_N = to_string(N);
+    string number_k = to_string(k);
+
+    outfilename = "eigenvalues_"+number_N+"_k"+number_k+".txt";
+    ofile.open(outfilename);
+    ofile << showpoint << setprecision(6) << setw(6) << "eigenvalues (corresponds to columns in 'eigenvectors_*_.txt')" << endl;
+    ofile << "------------------------------" << endl;
+    lambdas.print(ofile);
+    ofile.close();
+
+    //Add N and k to file
+    ofile.open("Lanczos_N_and_K.txt", ios_base::app);
+    ofile << "N = " << N << "  k = " << k << endl;
+    ofile.close();
+
+}
+
 // borrowed some main code to make tri-diag. matrix and test QR-algo.
 int main(int argc, char *argv[]){
   int N = atof(argv[1]);
-  int m = 10;
+  int m = 0;
   if(argc<3){
     m = N;
   }
@@ -101,29 +123,32 @@ int main(int argc, char *argv[]){
     m = atof(argv[2]);
   }
   mat A = zeros<mat>(N,N);
-  double h = 1.0/(double) N; //rho_N = 1 rho_0 = 0
+  double h = 10.0/(double) N; //rho_N = 1 rho_0 = 0
   double hh = h*h;
   double d = 2.0/hh; //diagonal elements
   double a = -1/hh;
+  clock_t start, finish;
 
   for (int i = 0; i < N-1; i++){ //making the tridiagonal matrix
-    A(i,i) = d;
+    A(i,i) = d + i*i*hh;
     A(i,i+1) = A(i+1,i) = a;
   }
   A(N-1,N-1) = 2.0/hh; //setting last diagonal element, as for loop does not go this far
 
   //Preforme Lanczos on A
+  start = clock();
   mat T = Lanczos(A,N,m);
   //Find the eigenvalues of T with the QR algorithm
   QR(T,20);
+  finish = clock();
   vec temp = analytic_eigvals(N, d, a);
   vec eigvals_Lanczos = get_eigvals(T,m);
+  //vec eigenvalues_arma = eig_sym(A);
   mat standin = randu<mat>(m,m);//dummy matrix passed to sort to get eigenvalues
   sort_eigenproblem(standin,eigvals_Lanczos,m);
-  cout << "Analytical Eigenvalues (" << m <<" first) = " << endl;
-  for(int i=0;i<m;i++){
-    cout << "  " << temp(i) << endl;
-  }
-  eigvals_Lanczos.print("Eigenvalues Lanczos = ");
+  print_file(eigvals_Lanczos,N,m);
+
+  double time_spent = ((double)(finish - start)/ CLOCKS_PER_SEC);
+  cout <<"Time spent = " << time_spent << " seconds" <<endl;
   return 0;
 }
