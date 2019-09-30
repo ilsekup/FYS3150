@@ -16,8 +16,8 @@ int main(int argc, char *argv[]){
   clock_t start, finish;
   double time_spent;
   int N = atof(argv[1]);
-  double max = 1.0; //when we dont have a potential rho[N-1] = 1, when we do rho[N-1] =infinity
-  mat A = initialize(N, max, false);
+  double max = 4.0; //when we dont have a potential rho[N-1] = 1, when we do rho[N-1] =infinity
+  mat A = initialize(N, max, true);
   mat R(N,N,fill::eye);
   double h = 1.0/N; //rho_N = 1 rho_0 = 0
   double hh = h*h;
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]){
   cout << "Time spend with jacobi_method: " << time_spent << " s" << endl;
   //R.print("R = ");
   //A.print("A = ");
-  double average_error = get_error(eigenvalues_analytical, eigenvalues_Jacobi, N);
+  double average_error = get_error(eigenvalues_analytical_potential, eigenvalues_Jacobi, N);
   cout<<"The average error for the ten first elements for N = " << N << " is: "<< average_error << endl;
   print_file(R,eigenvalues_Jacobi, average_error, N);
 
