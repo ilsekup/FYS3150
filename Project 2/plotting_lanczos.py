@@ -53,7 +53,7 @@ for eigval in eigvals_analytical:
 plt.savefig("lanczos_eigvals_%i.png"%(N))
 
 plt.figure()
-plt.title("Time used, Lanczos' and QR = %i"%(N), fontsize = 16)
+plt.title("Time used, Lanczos' and QR, N = %i"%(N), fontsize = 16)
 plt.xlabel("k", fontsize = 14)
 plt.ylabel("t [s]", fontsize = 14)
 
