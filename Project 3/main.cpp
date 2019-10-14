@@ -6,4 +6,15 @@
 #include "time.h"
 #include <string>
 #include <armadillo>
-#include <mpi.h>
+#include "Gauss.h"
+#include "Gauss.cpp"
+
+int main(){
+  int N;
+  double lam;
+  cout << "Enter interger for N: " << endl;
+  cin >> N;
+  cout << "Enter double for lambda: " << endl;
+  cin >> lam;
+  double integral = calculate(N, lam);
+}
