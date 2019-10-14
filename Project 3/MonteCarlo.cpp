@@ -28,17 +28,16 @@ double uniform();
 
 //set engine
 ranlux48 engine;
-double inf = 10;
+double inf = 5.0;
 
 int main(int argc, char *argv[]){
     int N = atof(argv[1]);
-    double inf = 100.0;
     double exact = 5*M_PI*M_PI/(256);
     
     engine.seed(time(NULL));
 
     double MC_estimate = MonteCarlo(func,uniform,N,6);
-    MC_estimate *= pow(2*inf,6);
+    MC_estimate *= pow((2*inf),6);
 
     cout << "Monte Carlo estimate    =  " << MC_estimate << endl;
     cout << "Excat solution estimate =  " << exact << endl;
@@ -53,7 +52,6 @@ double MonteCarlo(double (*func)(double*), double (*random)(), int N, int d){
         for(int j=0;j<d;j++){
             r[j] = random();
         }
-        cout << r[0] << endl;
         sum += func(r);
     }
     return sum/ (double) N;
