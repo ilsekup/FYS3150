@@ -3,77 +3,41 @@
 #include <cstdlib>
 #include <fstream>
 #include <iomanip>
-#include "time.h"
 #include <string>
-#include <armadillo>
-
+#include "MonteCarlo.h"
+#include <random>
+#include <functional>
 
 using namespace std;
+using namespace std::placeholders;
 
-// Preforms MonteCarlo integration
-// Takes:
-// a function to integrate
-// a random number function, should take a number between 0 and 1 and return a double
-// The number of points to calculate
-// and the dimensions of the function
+double MonteCarlo(std::function<double(double*)> func, double* a, double* b, int N, int d){
+    uniform_real_distribution<double> distribution(0.0,1.0);
+    ranlux48 generator;
+    generator.seed(time(NULL));
+    auto random = bind(distribution,generator);
 
-double MonteCarlo(double (*)(double*), double (*)(), int, int);
-
-// The function to integrate
-double func(double*);
-
-// Placeholder function that generates random uniform numbers
-// Should be rewritten, maybe as a class
-double uniform();
-
-//set engine
-ranlux48 engine;
-double inf = 5.0;
-
-int main(int argc, char *argv[]){
-    int N = atof(argv[1]);
-    double exact = 5*M_PI*M_PI/(256);
-    
-    engine.seed(time(NULL));
-
-    double MC_estimate = MonteCarlo(func,uniform,N,6);
-    MC_estimate *= pow((2*inf),6);
-
-    cout << "Monte Carlo estimate    =  " << MC_estimate << endl;
-    cout << "Excat solution estimate =  " << exact << endl;
-    return 0;
-}
-
-double MonteCarlo(double (*func)(double*), double (*random)(), int N, int d){
+    // Define arrays for a-b and the random values for the position vector r
+    double* diff = new double[d];
     double* r = new double[d];
+    double jacobian = 1.0;
+
+    for(int i=0;i<d;i++){
+      diff[i] = b[i] - a[i];
+      jacobian *= diff[i];
+    }
+
     double sum = 0;
 
     for(int i=0; i<N;i++){
         for(int j=0;j<d;j++){
-            r[j] = random();
+            r[j] = a[j] + random()*diff[j];
         }
         sum += func(r);
     }
-    return sum/ (double) N;
-}
+    delete [] r;
+    delete [] diff;
 
-double func(double* r){
-    double normr1, normr2, diff;
-
-    normr1 = normr2 = diff = 0;
-
-    for(int i=0;i<3;i++){
-        normr1 += r[2*i]*r[2*i];
-        normr2 += r[2*i+1]*r[2*i+1];
-        diff += (r[2*i+1] - r[2*i])*(r[2*i+1] - r[2*i]);
-    }
-    normr1 = sqrt(normr1);
-    normr2 = sqrt(normr2);
-    diff = sqrt(diff);
-    return exp(-4*(normr1 + normr2)) / diff;
-}
-
-double uniform(){
-    uniform_real_distribution<double> distribution(-inf,inf);
-    return distribution(engine);
+    sum *= jacobian;
+    return sum / (double) N;
 }
