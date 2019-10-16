@@ -39,19 +39,35 @@ int main(int argc, char *argv[]){
 
     double inf = 5;
     //uniform_transform infinity(-inf,inf);
-    double (uniform_transform::*method_pointers)(double) = NULL;
-    method_pointers = &uniform_transform::transform;
-    uniform_transform infinity(-inf,inf);
 
-    FunctionPointers fp[6];
+    double* start = new double[6];
+    double* stop = new double[6];
+
     for(int i=0;i<6;i++){
-      fp[i] = &(infinity.*method_pointers);
+      start[i] = -inf;
+      stop[i] = inf;
     }
-    double MC_estimate = MonteCarlo(f,fp,N,6);
-    MC_estimate *= pow((2*inf),6);
+    double MC_estimate = 0;
+    double MC_importance_sampling = 0;
 
-    cout << "Monte Carlo estimate    =  " << MC_estimate << endl;
-    cout << "Excat solution estimate =  " << exact << endl;
+    MC_estimate = MonteCarlo(f,start,stop,N,6);
+
+    for(int i=0;i<6;i++){
+      start[i] = 0;
+    }
+    stop[0] = stop[3] = 1;
+    stop[1] = stop[4] = M_PI;
+    stop[2] = stop[5] = 2*M_PI;
+
+    double lambda = 2.0;
+
+    F Func(lambda);
+
+    MC_importance_sampling = MonteCarlo(Func.f_on_p,start,stop,N,6);
+
+    cout << "Monte Carlo estimate                        =  " << MC_estimate << endl;
+    cout << "Monte Carlo estimate (impottance sampling)  =  " << MC_importance_sampling << endl;
+    cout << "Excat solution estimate                     =  " << exact << endl;
     return 0;
 }
 
