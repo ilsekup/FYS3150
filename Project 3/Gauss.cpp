@@ -7,6 +7,7 @@
 #include <string>
 #include <armadillo>
 #include <stdlib.h>
+#include"Gauss.h"
 using namespace std;
 
 void gauleg(double, double, double *, double *, int);
@@ -110,6 +111,4 @@ double Gausslaguerre(int N){
   delete [] phi;
   delete [] wphi;
   return int_gausslag;
-}
-
 }
