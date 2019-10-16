@@ -9,8 +9,9 @@
 #include <functional>
 
 using namespace std;
+using namespace std::placeholders;
 
-double MonteCarlo(double (*func)(double* ), double* a, double* b, int N, int d){
+double MonteCarlo(std::function<double(double*)> func, double* a, double* b, int N, int d){
     uniform_real_distribution<double> distribution(0.0,1.0);
     ranlux48 generator;
     generator.seed(time(NULL));
