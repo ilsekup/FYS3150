@@ -74,8 +74,8 @@ int main(int argc, char *argv[]){
     MC_importance_sampling = MonteCarlo(f2,start,stop,N,6);
 
     cout << "Monte Carlo estimate                        =  " << MC_estimate << endl;
-    cout << "Monte Carlo estimate (impottance sampling)  =  " << MC_importance_sampling << endl;
-    cout << "Excat solution estimate                     =  " << exact << endl;
+    cout << "Monte Carlo estimate (importance sampling)  =  " << MC_importance_sampling << endl;
+    cout << "Exact solution                              =  " << exact << endl;
     return 0;
 }
 
