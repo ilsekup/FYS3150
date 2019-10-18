@@ -11,10 +11,10 @@
 using namespace std;
 using namespace std::placeholders;
 
-array<double, 2> MonteCarlo(std::function<double(double*)> func, double* a, double* b, int N, int d){
+array<double, 2> MonteCarlo(std::function<double(double*)> func, double* a, double* b, int N, int d, unsigned int s){
     uniform_real_distribution<double> distribution(0.0,1.0);
     mt19937_64 generator;
-    generator.seed(time(NULL));
+    generator.seed(s);
     auto random = bind(distribution,generator);
 
     // Define arrays for a-b and the random values for the position vector r
@@ -30,7 +30,7 @@ array<double, 2> MonteCarlo(std::function<double(double*)> func, double* a, doub
 
     double sum = 0, sum_sqr = 0;
     double fr;
-    // Find the sum f(x_i), and the sum of f(x_i^2)
+    // Find the sum f(x_i), and the sum of f(x_i)^2
     for(int i=0; i<N;i++){
         for(int j=0;j<d;j++){
             r[j] = a[j] + random()*diff[j];

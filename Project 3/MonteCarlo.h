@@ -19,6 +19,6 @@ using namespace std::placeholders;
 // a random number function, should take a number between 0 and 1 and return a double
 // The number of points to calculate
 // and the dimensions of the function
-array<double, 2> MonteCarlo(std::function<double(double*)>, double* , double* , int, int);
+array<double, 2> MonteCarlo(std::function<double(double*)>, double* , double* , int, int, unsigned int);
 
 #endif
