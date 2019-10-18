@@ -11,9 +11,9 @@
 using namespace std;
 using namespace std::placeholders;
 
-double MonteCarlo(std::function<double(double*)> func, double* a, double* b, int N, int d){
+array<double, 2> MonteCarlo(std::function<double(double*)> func, double* a, double* b, int N, int d){
     uniform_real_distribution<double> distribution(0.0,1.0);
-    ranlux48 generator;
+    mt19937_64 generator;
     generator.seed(time(NULL));
     auto random = bind(distribution,generator);
 
@@ -22,22 +22,33 @@ double MonteCarlo(std::function<double(double*)> func, double* a, double* b, int
     double* r = new double[d];
     double jacobian = 1.0;
 
+    // Calculate the jacobian
     for(int i=0;i<d;i++){
       diff[i] = b[i] - a[i];
       jacobian *= diff[i];
     }
 
-    double sum = 0;
-
+    double sum = 0, sum_sqr = 0;
+    double fr;
+    // Find the sum f(x_i), and the sum of f(x_i^2)
     for(int i=0; i<N;i++){
         for(int j=0;j<d;j++){
             r[j] = a[j] + random()*diff[j];
         }
-        sum += func(r);
+        fr = func(r);
+        sum += fr;
+        sum_sqr += fr*fr;
     }
+    // Delete arrays
     delete [] r;
     delete [] diff;
+    sum_sqr /= (double) N;
+    sum /= (double) N;
+
+    double sigma = jacobian*sqrt((sum_sqr - sum*sum) / (double) N);
 
     sum *= jacobian;
-    return sum / (double) N;
+    //sum = sum / (double) N;
+
+    return {sum,sigma};
 }

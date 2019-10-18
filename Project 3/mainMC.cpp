@@ -17,35 +17,36 @@ double f(double* );
 // y(x)
 void transform_r(double*, double);
 
-// Short class for function with imortance sampling (f(x(y))/p(x(y))), as lambda may vary
+// Short class for function with imortance sampling (f(x(y))/p(x(y))), for varying alpha
 class F{
-  double lambda;
-  double sqr_lambda;
+  double alpha;
+  double sqr_alpha;
 public:
-  F(double _lambda){
-    lambda = _lambda;
-    sqr_lambda = lambda*lambda;
+  F(double _alpha){
+    alpha = _alpha;
+    sqr_alpha = alpha*alpha;
   }
   double f_on_p(double* );
 };
 double F::f_on_p(double* x){
-  transform_r(x,lambda);
+  transform_r(x,alpha);
   double r1sqr, r2sqr;
   r1sqr = x[0]*x[0];
   r2sqr = x[3]*x[3];
-  double exp_term = exp(-4*(x[0]+x[3]));
+  double exp_on_p = exp((alpha-4)*(x[0]+x[3]))/sqr_alpha;
   double cosbeta = cos(x[1])*cos(x[4]) + sin(x[1])*sin(x[4])*cos(x[2]-x[5]);
-  double p = sqr_lambda*exp(-lambda*(x[0] + x[3]));
-  return exp_term*r1sqr*r2sqr*sin(x[1])*sin(x[4])/(p*sqrt(r1sqr + r2sqr - 2*x[0]*x[3]*cosbeta));
+  return exp_on_p*r1sqr*r2sqr*sin(x[1])*sin(x[4])/(sqrt(r1sqr + r2sqr - 2*x[0]*x[3]*cosbeta));
 }
 
+// Function to integrate when alpha = 4, less computationally heavy
+// (for pard d and e)
+double f2(double*);
 
 int main(int argc, char *argv[]){
     int N = atof(argv[1]);
     double exact = 5*M_PI*M_PI/256;
 
-    double inf = 5;
-    //uniform_transform infinity(-inf,inf);
+    double inf = 2.0;
 
     double* start = new double[6];
     double* stop = new double[6];
@@ -54,8 +55,8 @@ int main(int argc, char *argv[]){
       start[i] = -inf;
       stop[i] = inf;
     }
-    double MC_estimate = 0;
-    double MC_importance_sampling = 0;
+    array<double, 2> MC_estimate;
+    array<double, 2> MC_importance_sampling;
 
     MC_estimate = MonteCarlo(f,start,stop,N,6);
 
@@ -66,15 +67,16 @@ int main(int argc, char *argv[]){
     stop[1] = stop[4] = M_PI;
     stop[2] = stop[5] = 2*M_PI;
 
-    double lambda = 2.0;
 
-    F Func2(lambda);
-    auto f2 = std::bind(&F::f_on_p, Func2, _1);
+    // How to use the function, if one want alpha != 4:
+    //double alpha = 2.0;
+    //F instance(alpha);
+    //auto int_func = std::bind(&F::f_on_p, instance, _1);
 
     MC_importance_sampling = MonteCarlo(f2,start,stop,N,6);
 
-    cout << "Monte Carlo estimate                        =  " << MC_estimate << endl;
-    cout << "Monte Carlo estimate (importance sampling)  =  " << MC_importance_sampling << endl;
+    cout << "Monte Carlo estimate                        =  " << MC_estimate[0] << " sigma = " << MC_estimate[1] << endl;
+    cout << "Monte Carlo estimate (importance sampling)  =  " << MC_importance_sampling[0] << " sigma = " << MC_importance_sampling[1] << endl;
     cout << "Exact solution                              =  " << exact << endl;
     return 0;
 }
@@ -95,7 +97,16 @@ double f(double* r){
     return exp(-4*(normr1 + normr2)) / diff;
 }
 
-void transform_r(double* r, double lamb){
-  r[0] = -log(1-r[0])/lamb;
-  r[3] = -log(1-r[3])/lamb;
+double f2(double* x){
+  transform_r(x,4.0);
+  double r1sqr, r2sqr;
+  r1sqr = x[0]*x[0];
+  r2sqr = x[3]*x[3];
+  double cosbeta = cos(x[1])*cos(x[4]) + sin(x[1])*sin(x[4])*cos(x[2]-x[5]);
+  return 0.0625*r1sqr*r2sqr*sin(x[1])*sin(x[4])/(sqrt(r1sqr + r2sqr - 2*x[0]*x[3]*cosbeta));
+}
+
+void transform_r(double* r, double alpha){
+  r[0] = -log(1-r[0])/alpha;
+  r[3] = -log(1-r[3])/alpha;
 }
