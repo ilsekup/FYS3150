@@ -49,10 +49,7 @@ double Gausslegendre(int N, double lam){
       }
     }
   }
-  cout << "Legendre method with N= "<< N << endl;
-  cout <<"Integral: " <<int_gauss << endl;
-  double Error = 0.19277 - int_gauss;
-  cout <<"Error: " << Error << endl;
+
   delete [] x;
   delete [] w;
   return int_gauss;
@@ -61,7 +58,7 @@ double Gausslegendre(int N, double lam){
 
 //the function we want to integrate over in spherical coordinates
 double int_func_sphere(double r1, double r2, double theta1, double theta2, double phi1, double phi2){
-  double numerator = sin(theta1)*sin(theta2);
+  double numerator = sin(theta1)*sin(theta2)*exp(-3*(r1 +r2)); //!!!!!!!!!
   double cosb = cos(theta1)*cos(theta2) + (sin(theta1)*sin(theta2)*cos(phi1-phi2));
   double denominator = sqrt(r1*r1 + r2*r2 - (2*r1*r2*cosb));
   double tol = 1e-6; //making sure the denominator is not zero or almost zero
@@ -99,11 +96,6 @@ double Gausslaguerre(int N){
     }
   }
   //the integral of r1^2 r2^2 exp(-4(r1 + r2)) is 1/1024, add this at the end.
-  int_gausslag = (1/1024.*int_gausslag);
-  cout << "Laguerre method with N= "<< N << endl;
-  cout <<"Integral: " <<int_gausslag << endl;
-  double Errorlag = 0.19277 - int_gausslag;
-  cout <<"Error: " << Errorlag << endl;
   delete [] rlag;
   delete [] wlag;
   delete [] wtheta;
