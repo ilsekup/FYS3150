@@ -43,7 +43,7 @@ double F::f_on_p(double* x){
 }
 
 // Function to integrate when alpha = 4, less computationally heavy
-// (for pard d and e)
+// (for part d and e)
 double f2(double*);
 
 int main(int argc, char *argv[]){
