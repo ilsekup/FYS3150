@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
-#include "MonteCarlo.h"
+#include "MonteCarloMP.h"
 #include <random>
 #include <functional>
 #include <omp.h>
@@ -12,7 +12,7 @@
 using namespace std;
 using namespace std::placeholders;
 
-array<double, 2> MonteCarlo(std::function<double(double*)> func, double* a, double* b, int N, int d)
+array<double, 2> MonteCarloMP(std::function<double(double*)> func, double* a, double* b, int N, int d)
 {
 
   double sum = 0, sum_sqr = 0;
@@ -52,11 +52,10 @@ array<double, 2> MonteCarlo(std::function<double(double*)> func, double* a, doub
     }
     // Delete arrays
     delete [] r;
-    delete [] diff;
   }
+    delete [] diff;
     sum_sqr /= (double) N;
     sum /= (double) N;
-
     double sigma = jacobian*sqrt((sum_sqr - sum*sum) / (double) N);
 
     sum *= jacobian;

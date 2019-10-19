@@ -5,7 +5,7 @@
 #include <iomanip>
 #include "time.h"
 #include <string>
-#include "MonteCarlo.h"
+#include "MonteCarloMP.h"
 #include <functional>
 
 using namespace std;
@@ -61,10 +61,10 @@ int main(int argc, char *argv[]){
     array<double, 2> MC_estimate;
     array<double, 2> MC_importance_sampling;
     start = clock();
-    MC_estimate = MonteCarlo(f,begin,stop,N,6);
+    MC_estimate = MonteCarloMP(f,begin,stop,N,6);
     finish = clock();
     time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
-    cout << "Time spent MC = "<< time_spent<< "Seconds"<<endl;
+    cout << "Time spent MC = "<< time_spent << " seconds"<<endl;
     for(int i=0;i<6;i++){
       begin[i] = 0;
     }
@@ -78,10 +78,10 @@ int main(int argc, char *argv[]){
     //F instance(alpha);
     //auto int_func = std::bind(&F::f_on_p, instance, _1);
     start = clock();
-    MC_importance_sampling = MonteCarlo(f2,begin,stop,N,6);
+    MC_importance_sampling = MonteCarloMP(f2,begin,stop,N,6);
     finish = clock();
     time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
-    cout << "Time spent MC (IS)  = "<< time_spent << "Seconds"<< endl;
+    cout << "Time spent MC (IS)  = "<< time_spent << " seconds"<< endl;
     cout << "Monte Carlo estimate                        =  " << MC_estimate[0] << " sigma = " << MC_estimate[1] << endl;
     cout << "Monte Carlo estimate (importance sampling)  =  " << MC_importance_sampling[0] << " sigma = " << MC_importance_sampling[1] << endl;
     cout << "Exact solution                              =  " << exact << endl;
