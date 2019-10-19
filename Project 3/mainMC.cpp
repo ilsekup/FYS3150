@@ -97,7 +97,7 @@ int main(int argc, char *argv[]){
     for(int i=0;i<num_tries;i++){
       cout << "Starting importance sampling run " << i << endl;
       t1 = high_resolution_clock::now();
-      MC_estimate = MonteCarlo(f,start,stop,N,6,seed);
+      MC_estimate = MonteCarlo(f2,start,stop,N,6,seed);
       t2 = high_resolution_clock::now();
       t = t2 - t1;
       seed += 10;
