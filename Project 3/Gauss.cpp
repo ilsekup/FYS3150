@@ -29,7 +29,7 @@ double int_function(double x1, double y1, double z1, double x2, double y2, doubl
   }
 
 //calculating the sum as an approximation of the integral using weights found with legendre polynomial
-double Gausslegendre(int N, double lam){
+tuple<double, double> Gausslegendre(int N, double lam){
   double *x = new double [N];
   double *w = new double [N];
 
@@ -52,13 +52,13 @@ double Gausslegendre(int N, double lam){
 
   delete [] x;
   delete [] w;
-  return int_gauss;
+  return make_tuple(int_gauss, w[1]);
 }
 
 
 //the function we want to integrate over in spherical coordinates
 double int_func_sphere(double r1, double r2, double theta1, double theta2, double phi1, double phi2){
-  double numerator = sin(theta1)*sin(theta2)*exp(-3*(r1 +r2)); //!!!!!!!!!
+  double numerator = sin(theta1)*sin(theta2);//*exp(-3*(r1 +r2)); //!!!!!!!!!
   double cosb = cos(theta1)*cos(theta2) + (sin(theta1)*sin(theta2)*cos(phi1-phi2));
   double denominator = sqrt(r1*r1 + r2*r2 - (2*r1*r2*cosb));
   double tol = 1e-6; //making sure the denominator is not zero or almost zero
@@ -70,7 +70,7 @@ double int_func_sphere(double r1, double r2, double theta1, double theta2, doubl
 
 
 //calculating the sum by finding the phi and theta weights with legendre and r weights with laguerre
-double Gausslaguerre(int N){
+tuple<double, double> Gausslaguerre(int N){
   double *rlag = new double[N+1]; //laguerre starts from 1
   double *wlag  = new double[N+1];
   double *phi = new double[N];
@@ -96,11 +96,12 @@ double Gausslaguerre(int N){
     }
   }
   //the integral of r1^2 r2^2 exp(-4(r1 + r2)) is 1/1024, add this at the end.
+  int_gausslag = 1/1024.*int_gausslag;
   delete [] rlag;
   delete [] wlag;
   delete [] wtheta;
   delete [] theta;
   delete [] phi;
   delete [] wphi;
-  return int_gausslag;
+  return make_tuple(int_gausslag, wlag[1]);
 }

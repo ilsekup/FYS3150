@@ -3,7 +3,7 @@
 # Here we define compiler option, libraries and the  target
 CPPflags= c++ -O3 lib.cpp gauss-laguerre.cpp
 # Here we define the library functions we nee
-LIB = -larmadillo -llapack -lblas
+# LIB = -larmadillo -llapack -lblas
 # Here we define the name of the executable
 PROG= testcode
 ${PROG} :	   	tests-main.o  test_functions.o Gauss.o
