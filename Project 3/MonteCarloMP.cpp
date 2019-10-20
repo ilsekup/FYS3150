@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
-#include "MonteCarloMP.h"
+#include "MonteCarlo.h"
 #include <random>
 #include <functional>
 #include <omp.h>
@@ -26,12 +26,12 @@ array<double, 2> MonteCarloMP(std::function<double(double*)> func, double* a, do
     jacobian *= diff[i];
       }
   int p = 0; // thread number
-#pragma omp parallel shared(sum, sum_sqr,jacobian,diff) private(p)
+#pragma omp parallel shared(sum, sum_sqr,jacobian,diff) private(p) num_threads(4)
   {
     p = omp_get_thread_num();
     uniform_real_distribution<double>distribution(0.0,1.0);
     mt19937_64 generator;
-    generator.seed(time(NULL) + 10 * p);
+    generator.seed(time(NULL) + 100 * p);
     auto random = bind(distribution,generator);
 
     // Define arrays for a-b and the random values for the position vector r
@@ -53,9 +53,10 @@ array<double, 2> MonteCarloMP(std::function<double(double*)> func, double* a, do
     // Delete arrays
     delete [] r;
   }
-    delete [] diff;
+  delete [] diff;
     sum_sqr /= (double) N;
     sum /= (double) N;
+
     double sigma = jacobian*sqrt((sum_sqr - sum*sum) / (double) N);
 
     sum *= jacobian;

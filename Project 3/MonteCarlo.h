@@ -20,5 +20,5 @@ using namespace std::placeholders;
 // The number of points to calculate
 // and the dimensions of the function
 array<double, 2> MonteCarlo(std::function<double(double*)>, double* , double* , int, int, unsigned int);
-
+array<double, 2> MonteCarloMP(std::function<double(double*)>, double* , double* , int, int);
 #endif
