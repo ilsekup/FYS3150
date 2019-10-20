@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
 
 exact_answer = 5*np.pi**2/256
 
@@ -33,6 +32,7 @@ I_avg = np.zeros(len(Ns))
 sigma_avg = np.zeros(len(Ns))
 t_avg = np.zeros(len(Ns))
 mean_error_MC = np.zeros(len(Ns))
+act_sig = np.zeros(len(Ns))
 
 for i,n in enumerate(Ns):
     bool_arr = N == n
@@ -40,6 +40,8 @@ for i,n in enumerate(Ns):
     sigma_avg[i] = np.sum(sigma[bool_arr])/count[i]
     mean_error_MC[i] = np.sum(np.abs(I[bool_arr]-exact_answer))/count[i]
     t_avg[i] = np.sum(t[bool_arr])/count[i]
+    act_sig[i] = np.sqrt(np.sum((exact_answer - I[bool_arr])**2)/count[i])
+
 
 # Repeat for importance sampling
 filename = "estimates_MonteCarlo_imps.txt"
@@ -70,6 +72,7 @@ Ns_imps, count_imps = np.unique(N,False,False,True)
 sigma_imps_avg = np.zeros(len(Ns_imps))
 mean_error_MC_imps = np.zeros(len(Ns_imps))
 t_imps_avg = np.zeros(len(Ns_imps))
+act_sig_imps = np.zeros(len(Ns_imps))
 
 for i,n in enumerate(Ns_imps):
     bool_arr = N == n
@@ -77,6 +80,7 @@ for i,n in enumerate(Ns_imps):
     sigma_imps_avg[i] = np.sum(sigma[bool_arr])/count_imps[i]
     mean_error_MC_imps[i] = np.sum(np.abs(I[bool_arr]-exact_answer))/count_imps[i]
     t_imps_avg[i] = np.sum(t[bool_arr])/count_imps[i] 
+    act_sig_imps[i] = np.sqrt(np.sum((exact_answer - I[bool_arr])**2)/count_imps[i])
 
 # Find gauss quadrature values
 
@@ -143,37 +147,53 @@ for i,n in enumerate(Ns_lag):
     mean_error_lag[i] = np.sum(np.abs(I[bool_arr]-exact_answer))/count_lag[i]
     t_lag_avg[i] = np.sum(t[bool_arr])/count_lag[i]
 
+coeffs_bruteforce = np.polyfit(np.log10(Ns),np.log10(sigma_avg),1)
+coeffs_imps = np.polyfit(np.log10(Ns),np.log10(sigma_imps_avg),1)
+
+print(f"slope for brute force = {coeffs_bruteforce[0]:.2f}")
+print(f"slope for importance sampling = {coeffs_imps[0]:.2f}")
+
+
 plt.figure(figsize = (7,5))
-plt.title("The mean error, as function of integration points",fontsize = 16)
+plt.title(r"The mean $\sigma$ plotted against integration points",fontsize = 16)
 plt.xlabel(r"$\log_{10}$ N", fontsize = 14)
-plt.ylabel(r"$\log_{10}$ mean error", fontsize = 14)
-plt.plot(np.log10(Ns),np.log10(mean_error_MC),label = "Brute force MC")
-plt.plot(np.log10(Ns_imps),np.log10(mean_error_MC_imps),label = "Importance sampling MC")
+plt.ylabel(r"$\log_{10} \, \overline{\sigma}$", fontsize = 14)
 
+plt.plot(np.log10(Ns),np.log10(sigma_avg),'bx',label = r"Brute force MC ($\infty = 2$)",markersize = 8)
+plt.plot(np.log10(Ns_imps),np.log10(sigma_imps_avg),'rx',label = "Importance sampling MC",markersize = 8)
 
+plt.plot(np.log10(Ns),np.log10(act_sig),'bo')
+plt.plot(np.log10(Ns_imps),np.log10(act_sig_imps),'ro')
+
+plt.plot(np.log10(Ns),np.polyval(coeffs_bruteforce,np.log10(Ns)), 'b--')
+plt.plot(np.log10(Ns),np.polyval(coeffs_imps,np.log10(Ns)), 'r--')
+
+plt.grid()
 plt.legend(fontsize = 12)
 plt.savefig("errors_MC.png")
-plt.show()
 
 plt.figure(figsize = (7,5))
 plt.xlabel(r"$\log_{10}$ N", fontsize = 14)
 plt.ylabel(r"$\log_{10}$ time [s]", fontsize = 14)
-plt.title("The time used, as function of integration points",fontsize = 16)
-plt.plot(np.log10(Ns),np.log10(t_avg),label = "Brute force")
-plt.plot(np.log10(Ns_imps),np.log10(t_imps_avg),label = "Importance sampling")
+plt.title("The time used plotted against of integration points",fontsize = 16)
+plt.plot(np.log10(Ns),np.log10(t_avg),'x',label = r"Brute force ($\infty = 2$)",markersize = 8)
+plt.plot(np.log10(Ns_imps),np.log10(t_imps_avg),'x',label = "Importance sampling",markersize = 8)
 
 plt.legend(fontsize = 12)
+plt.grid()
+
 plt.savefig("time_MC.png")
 
 plt.figure(figsize = (7,5))
 plt.xlabel(r"$\log_{10}$ time [s]", fontsize = 14)
 plt.ylabel(r"$\log_{10}$ mean error", fontsize = 14)
 plt.title("Mean error, as function of time",fontsize = 16)
-plt.plot(np.log10(t_avg),np.log10(mean_error_MC), "x",label = "Brute force MC")
-plt.plot(np.log10(t_imps_avg),np.log10(mean_error_MC_imps), "x",label = "Importance sampling MC")
-plt.plot(np.log10(t_leg_avg),np.log10(mean_error_leg), "x",label = "Legendre GQ")
-plt.plot(np.log10(t_lag_avg),np.log10(mean_error_lag), "x",label = "Laguerre GQ")
+plt.plot(np.log10(t_avg),np.log10(mean_error_MC), "x",label = r"Brute force MC ($\infty = 2$)",markersize = 8)
+plt.plot(np.log10(t_imps_avg),np.log10(mean_error_MC_imps), "x",label = "Importance sampling MC",markersize = 8)
+plt.plot(np.log10(t_leg_avg),np.log10(mean_error_leg), "x",label = r"Legendre GQ ($\infty = 2$)",markersize = 8)
+plt.plot(np.log10(t_lag_avg),np.log10(mean_error_lag), "x",label = "Laguerre GQ",markersize = 8)
 
+plt.grid()
 plt.legend(fontsize = 12)
 plt.savefig("errorVStime.png")
 
