@@ -8,7 +8,7 @@
 #include <armadillo>
 #include "Gauss.h"
 #include "Gauss.cpp"
-
+//compile mainGauss.cpp with lib.cpp and gauss-laguerre.cpp
 int main(){
    int N;
    double lam;
