@@ -65,7 +65,7 @@ for k in range(len(filenames)):
     sigma = np.zeros(N_data)
     t = np.zeros(N_data)
 
-    for i,line in enumerate(lines): #Putting the eigenvectors into arrays
+    for i,line in enumerate(lines):
         text = line.split('=')
         _N = int(text[1].split()[0])
         _I = float(text[2].split()[0])
