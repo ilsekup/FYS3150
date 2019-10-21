@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import stats 
 
 exact_answer = 5*np.pi**2/256
 
@@ -15,7 +16,7 @@ I = np.zeros(N_data)
 sigma = np.zeros(N_data)
 t = np.zeros(N_data)
 
-for i,line in enumerate(lines): #Putting the eigenvectors into arrays
+for i,line in enumerate(lines):
     text = line.split('=')
     _N = int(text[1].split()[0])
     _I = float(text[2].split()[0])
@@ -56,7 +57,7 @@ I = np.zeros(N_data)
 sigma = np.zeros(N_data)
 t = np.zeros(N_data)
 
-for i,line in enumerate(lines): #Putting the eigenvectors into arrays
+for i,line in enumerate(lines):
     text = line.split('=')
     _N = int(text[1].split()[0])
     _I = float(text[2].split()[0])
@@ -95,7 +96,7 @@ N = np.zeros(N_data, dtype = int)
 I = np.zeros(N_data)
 t = np.zeros(N_data)
 
-for i,line in enumerate(lines): #Putting the eigenvectors into arrays
+for i,line in enumerate(lines):
     text = line.split('=')
     _N = int(text[1].split()[0])
     _I = float(text[2].split()[0])
@@ -126,7 +127,7 @@ N = np.zeros(N_data, dtype = int)
 I = np.zeros(N_data)
 t = np.zeros(N_data)
 
-for i,line in enumerate(lines): #Putting the eigenvectors into arrays
+for i,line in enumerate(lines):
     text = line.split('=')
     _N = int(text[1].split()[0])
     _I = float(text[2].split()[0])
@@ -147,11 +148,14 @@ for i,n in enumerate(Ns_lag):
     mean_error_lag[i] = np.sum(np.abs(I[bool_arr]-exact_answer))/count_lag[i]
     t_lag_avg[i] = np.sum(t[bool_arr])/count_lag[i]
 
+slope, intercept, _,_, std_err = stats.linregress(np.log10(Ns),np.log10(sigma_avg))
+slope_imps, intercept_imps, _,_, std_err_imps = stats.linregress(np.log10(Ns),np.log10(sigma_imps_avg))
+
 coeffs_bruteforce = np.polyfit(np.log10(Ns),np.log10(sigma_avg),1)
 coeffs_imps = np.polyfit(np.log10(Ns),np.log10(sigma_imps_avg),1)
 
-print(f"slope for brute force = {coeffs_bruteforce[0]:.2f}")
-print(f"slope for importance sampling = {coeffs_imps[0]:.2f}")
+print(f"slope for brute force = {slope:.2f} ± {std_err:.2f}")
+print(f"slope for importance sampling = {slope_imps:.3f} ± {std_err_imps:.3f}")
 
 
 plt.figure(figsize = (7,5))
