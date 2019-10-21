@@ -13,3 +13,6 @@ Unittests by compiling make. Runs the Gauss.cpp to test the gauss functions.
 
 ### Plots:
 Different plots made in python by using data from the cpp calculations. All .py files are plots of some sort. 
+
+### Article 
+Article uploaded as PDF file under the name  Project3_Fys3150.pdf
