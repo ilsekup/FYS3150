@@ -11,19 +11,21 @@ inline int periodic(int i, int limit, int add) {
   return (i+limit+add) % (limit);
 }
 
-//void read_input(int& n, int &, double &, double&, double&);
 void initialize(int n, double T, int **spin_matrix, double& E, double& M){
-  for(int y=0; y < n; y++){
-    for(int x=0; x < n; x++){
-      if(T < 1.5) spin_matrix[x][y] = 1;
-      M+= (double)spin_matrix[x][y];
+  for(int y=0; y < n; y++){ //columns
+    for(int x=0; x < n; x++){ //rows
+      if(T < 1.5){
+        spin_matrix[x][y] = 1; //element is one if the temp is low
+        }
+      M+= (double)spin_matrix[x][y]; //updating Magnetization
+
     }
   }
   for (int y=0; y < n; y++){
     for(int x=0; x < n; x++){
       E -= (double)(spin_matrix[periodic(y, n, -1)][x] + spin_matrix[y][periodic(x, n, -1)]);
 
-    }
+     }
   }
 }
 
@@ -43,7 +45,7 @@ void metropolis(int n, long& startpoint, int **spin_matrix, double& E, double& M
   }
 }
 
-void output(int n, int mc, double T, double *average)
+void writingfunc(int n, int mc, double T, double *average)
 {
 double norm = 1/((double) (mc)); // divided by total number of cycles
 double Eaverage = average[0]*norm;
@@ -97,12 +99,11 @@ int main(int argc, char* argv[]){
       average[4] += fabs(M);
   //    cout << "loop" << cycles << endl; //checing if the loop works
      }
-     output(n, mc, T, average);
+     writingfunc(n, mc, T, average);
   }
   finish = clock();
   time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
-  cout << "finished loop" << endl; // just to see how long it takes.
-  cout << "Time spent: " << time_spent << endl;
+  cout << "Time spent: " << time_spent << endl; //time spent on the loops and writing to file
   free_matrix((void**)spin_matrix); // freeing memory
   ofile.close();
   return 0;
