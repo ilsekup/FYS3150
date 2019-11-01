@@ -6,7 +6,6 @@ fil = open(filename, 'r') #reading file
 lines = fil.readlines() #splitting in lines
 length  = len(lines)
 
-
 # Initialize lists
 E = []
 M = []
