@@ -12,12 +12,24 @@ inline int periodic(int i, int limit, int add) {
   return (i+limit+add) % (limit);
 }
 
-void initialize(int n, double T, int **spin_matrix, double& E, double& M){
+void initialize(int n, double T, int **spin_matrix, double& E, double& M, bool ordered){
   for(int y=0; y < n; y++){ //columns
     for(int x=0; x < n; x++){ //rows
-      if(T < 1.5){
-        spin_matrix[x][y] = 1; //element is one if the temp is low
+      if(ordered==true){
+        spin_matrix[x][y] = 1;
+      }
+      else{
+         srand( time(NULL)+x); //Randomize seed initialization
+	       int randNum = rand() % 2; // Generate a random number between 0 and 1
+         // cout << randNum << endl;
+        if(randNum < 0.5){
+          spin_matrix[x][y] = -1;
         }
+        else{
+          spin_matrix[x][y] = 1;
+        }
+      }
+        // cout << spin_matrix[x][y] << endl;
       M+= (double)spin_matrix[x][y]; //updating Magnetization
 
     }
