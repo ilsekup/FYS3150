@@ -9,7 +9,7 @@
 #include "time.h"
 #include <string>
 
-void initialize(int, double, int **, double&, double&);
+void initialize(int, double, int **, double&, double&, bool);
 inline int periodic(int, int, int);
 void metropolis(int, long&, int**, double&, double&, double*);
 void writingfunc(int, int, double, double*);
