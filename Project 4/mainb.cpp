@@ -33,7 +33,7 @@ int main(int argc, char* argv[]){
     for(int de=-8; de <= 8; de++) w[de+8] = 0;
     for(int de =-8; de <= 8; de+=4)w[de+8] = exp(-de/T);
     for (int i = 0; i < 5; i++) average[i] = 0.;
-    initialize(n,  T, spin_matrix, E, M);
+    initialize(n,  T, spin_matrix, E, M, false);  //false if we want random spins, true for ordered 
     for(int cycles=1; cycles <= mc; cycles++){
       metropolis(n, startpoint, spin_matrix, E, M, w);
       average[0] += E;
@@ -50,5 +50,6 @@ int main(int argc, char* argv[]){
   cout << "Time spent: " << time_spent << endl; //time spent on the loops and writing to file
   free_matrix((void**)spin_matrix); // freeing memory
   ofile.close();
+
   return 0;
 }
