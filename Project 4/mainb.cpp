@@ -6,14 +6,17 @@
 #include "isingmodel.h"
 #include "isingmodel.cpp"
 
+//must be compiled with lib.cpp and must be run with name of an outputfile
+
 using namespace std;
 int main(int argc, char* argv[]){
   char *outfilename;
-  int n, mc;
+  int n;
+  double mc;
   double w[17], average[5], initial_T, final_T, E, M, T_step;
   outfilename = argv[1];
   ofile.open(outfilename);
-  cout << "Number of spins: " << endl;
+  cout << "Insert L, dimension of matrix: " << endl;
   cin >> n;
   cout << "Number of monte carlo cycles" << endl;
   cin >> mc;
