@@ -6,6 +6,9 @@
 #include "lib.h"
 #include "isingmodel.h"
 using namespace std;
+ofstream ofile;
+ofstream ofile2;
+ofstream ofile3;
 
 inline int periodic(int i, int limit, int add) {
   return (i+limit+add) % (limit);
@@ -77,4 +80,24 @@ void writingfunc(int n, int mc, double T, double *average, ostream& ofile)
   ofile << setw(15) << setprecision(8) << Mabsaverage/(n*n) << endl;
 }
 
+void writingfunc2(int n, int mc, double T, double *energy)
+{
+  double norm = 1/((double) (mc)); // divided by total number of cycles
+  double Eaverage = energy[0]*norm;
+  double E2average = energy[1]*norm;
+  double Mabsaverage = energy[3]*norm;
+  ofile2 << setiosflags(ios::showpoint | ios::uppercase);
+  ofile2 << setw(15) << setprecision(8) << Eaverage/(n*n);
+  ofile2 << setw(15) << setprecision(8) << Mabsaverage/(n*n) << endl;
+  // for(int i; i < mc; i++){
+  //   ofile2 << setw(15) << setprecision(8) << energy[i] / (n*n) << endl; // energy per particle
+  // }
 
+}
+
+void writingfunc3(int n, int mc, double T, double E, double *average, int cycles)
+{
+  ofile3 << setiosflags(ios::showpoint | ios::uppercase);
+  ofile3 << setw(15) << setprecision(8) << cycles; // cycle number
+  ofile3 << setw(15) << setprecision(8) << E / (n*n) << endl; // energy per particle
+}

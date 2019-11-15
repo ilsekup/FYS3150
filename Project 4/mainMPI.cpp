@@ -1,5 +1,5 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <iomanip>
 #include <cmath>
 #include <string>
@@ -79,8 +79,11 @@ int main(int argc, char* argv[]){
        cout << "Time spent on MC = " << t.count() << " seconds, T = " << temp << " L = " << n <<endl;
      }
   }
+  finish = clock();
   free_matrix((void **) spin_matrix);
   ofile.close();
   MPI_Finalize();
+  time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
+  cout << "Time spent: " << time_spent << endl; //time spent on the loops and writing to file
   return 0;
 }

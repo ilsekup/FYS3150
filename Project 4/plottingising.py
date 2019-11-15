@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-filename = "outfile.txt"
+filename = "outfilempi.txt"
 fil = open(filename, 'r') #reading file
 lines = fil.readlines() #splitting in lines
 length  = len(lines)
@@ -25,6 +25,7 @@ E = np.array(E)
 T = np.array(T)
 M = np.array(M)
 C = np.array(heatcapacity)
+X = np.array(X)
 
 plt.figure()
 plt.plot(T, E)
@@ -88,14 +89,12 @@ for i, s in enumerate(mc):
     Mtemp1ran[i] = M[0]
 mc = np.array(mc)
 fig, axs = plt.subplots(2, sharex=True)
-fig.suptitle('Temperature T=2.4 ')
-# axs[0].plot(mc, Etemp1, label='ordered')
-axs[0].plot(mc, Etemp1ran, label='random')
+fig.suptitle('Temperature T=1.0 ')
+axs[0].plot(x, E, label='ordered')
 axs[0].set_title('Energy')
 axs[0].legend()
 axs[0].set_ylabel('Energy/J')
-# axs[1].plot(mc, Mtemp1, label='ordered')
-axs[1].plot(mc, Mtemp1ran, label='random')
+axs[1].plot(x, M, label='ordered')
 axs[1].set_title('Magnetization')
 axs[1].legend()
 axs[1].set_ylabel('|M|')
