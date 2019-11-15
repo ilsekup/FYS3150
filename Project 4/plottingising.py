@@ -1,6 +1,74 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def load_plot_mpi():
+    """
+    loads data and plots data from mpi_ising program from run_mpi.sh
+    """
+    plt.figure('E')
+    plt.title('Mean Energy')
+    plt.xlabel("Temperature")
+    plt.ylabel("Mean energy/n^2")
+    plt.grid()
+
+    plt.figure('Mag')
+    plt.title('Abs Mean Magnetization')
+    plt.xlabel("Temperature")
+    plt.ylabel("Mean absolute Magnetization/n^2")
+    plt.grid()
+
+
+    plt.figure('hc')
+    plt.title('heatcapacity')
+    plt.xlabel("Temperature")
+    plt.ylabel(r"$\sigma_E^2/ T^2$")
+    plt.grid()
+
+    for L in np.arange(40,101,20):
+        filename = f"outfile_MPI_L{L}_n1e6.txt"
+        fil = open(filename, 'r') #reading file
+        lines = fil.readlines()
+        l = len(lines)
+        E = []
+        M = []
+        heatcapacity = []
+        T = []
+        X = []
+        for line in (lines):
+            T.append(float(line.split()[0]))
+            E.append(float(line.split()[1]))
+            heatcapacity.append(float(line.split()[2]))
+            X.append(float(line.split()[3]))
+            M.append(float(line.split()[4]))
+        E = np.array(E)
+        T = np.array(T)
+        M = np.array(M)
+        C = np.array(heatcapacity)
+        X = np.array(X)
+        fil.close()
+        plt.figure('E')
+        plt.plot(T, E,label=f"L = {L}")
+
+        plt.figure('Mag')
+        plt.plot(T, M,label=f"L = {L}")
+    
+        plt.figure('hc')
+        plt.plot(T, C,label=f"L = {L}")
+
+    plt.figure('E')
+    plt.legend()
+
+    plt.figure('Mag')
+    plt.legend()
+
+    plt.figure('hc')
+    plt.legend()
+        
+    plt.show()
+
+load_plot_mpi()
+"""
 filename = "outfilempi.txt"
 fil = open(filename, 'r') #reading file
 lines = fil.readlines() #splitting in lines
@@ -48,6 +116,7 @@ plt.xlabel("Temperature")
 plt.ylabel("sigma_E ^2/ T^2")
 plt.grid()
 plt.show()
+"""
 # mc =  [500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 30000, 40000,50000, 100000]
 """
 mc = np.arange(0, 100000, step=10000)
