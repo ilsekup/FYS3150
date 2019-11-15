@@ -37,7 +37,8 @@ int main(int argc, char* argv[]){
     for(int de=-8; de <= 8; de++) w[de+8] = 0;
     for(int de =-8; de <= 8; de+=4)w[de+8] = exp(-de/T);
     for (int i = 0; i < 5; i++) average[i] = 0.;
-    initialize(n,  T, spin_matrix, E, M, false);  //false if we want random spins, true for ordered
+    long seed = time(NULL);
+    initialize(n,  T, spin_matrix, E, M, seed, false);  //false if we want random spins, true for ordered
     for(int cycles=1; cycles <= mc; cycles++){
       metropolis(n, startpoint, spin_matrix, E, M, w);
       average[0] += E;
@@ -48,7 +49,7 @@ int main(int argc, char* argv[]){
      }
      writingfunc(n, mc, T, average);
   }
-  bool timeplot = true; //this loop is only needed for exercise c, for the time dependence
+  bool timeplot = false; //this loop is only needed for exercise c, for the time dependence
   if(timeplot == true){
   for(int sweep = 1; sweep < 10000; sweep = sweep + 10){
     double E2, M2;
@@ -56,7 +57,8 @@ int main(int argc, char* argv[]){
     for(int de2=-8; de2 <= 8; de2++) w[de2+8] = 0;
     for(int de2 =-8; de2 <= 8; de2+=4)w[de2+8] = exp(-de2/Tlone);
     for (int i = 0; i < 5; i++) energy[i] = 0.;
-    initialize(n,  Tlone, spin_matrix, E2, M2, true);  //false if we want random spins, true for ordered
+    long seed = time(NULL);
+    initialize(n,  Tlone, spin_matrix, E2, M2, seed, true);  //false if we want random spins, true for ordered
     for(int cycles= 1; cycles <= sweep; cycles++){
       metropolis(n, startpoint, spin_matrix, E2, M2, w);
       energy[0] += E2;
@@ -75,5 +77,4 @@ int main(int argc, char* argv[]){
   ofile.close();
 
   return 0;
-  energy[1] += E*E;
 }
