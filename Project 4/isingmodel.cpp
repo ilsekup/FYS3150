@@ -80,7 +80,7 @@ void writingfunc(int n, int mc, double T, double *average, ostream& ofile)
   ofile << setw(15) << setprecision(8) << Mabsaverage/(n*n) << endl;
 }
 
-void writingfunc2(int n, int mc, double T, double *energy)
+void writingfunc2(int n, int mc, double T, double *energy, ostream& ofile2)
 {
   double norm = 1/((double) (mc)); // divided by total number of cycles
   double Eaverage = energy[0]*norm;
@@ -95,7 +95,7 @@ void writingfunc2(int n, int mc, double T, double *energy)
 
 }
 
-void writingfunc3(int n, int mc, double T, double E, double *average, int cycles)
+void writingfunc3(int n, int mc, double T, double E, double *average, int cycles, ostream& ofile3)
 {
   ofile3 << setiosflags(ios::showpoint | ios::uppercase);
   ofile3 << setw(15) << setprecision(8) << cycles; // cycle number
