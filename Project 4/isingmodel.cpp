@@ -6,7 +6,6 @@
 #include "lib.h"
 #include "isingmodel.h"
 using namespace std;
-ofstream ofile;
 
 inline int periodic(int i, int limit, int add) {
   return (i+limit+add) % (limit);
@@ -58,7 +57,7 @@ void metropolis(int n, long& startpoint, int **spin_matrix, double& E, double& M
   }
 }
 
-void writingfunc(int n, int mc, double T, double *average)
+void writingfunc(int n, int mc, double T, double *average, ostream& ofile)
 {
   double norm = 1/((double) (mc)); // divided by total number of cycles
   double Eaverage = average[0]*norm;

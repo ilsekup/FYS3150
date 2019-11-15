@@ -26,31 +26,33 @@ T = np.array(T)
 M = np.array(M)
 C = np.array(heatcapacity)
 
-# plt.plot(T, E)
-# plt.title('Mean Energy')
-# plt.xlabel("Temperature")
-# plt.ylabel("Mean energy/n^2")
-# plt.grid()
-# plt.show()
-#
-# plt.plot(T, M)
-# plt.title('Abs Mean Magnetization')
-# plt.xlabel("Temperature")
-# plt.ylabel("Mean absolute Magnetization/n^2")
-# plt.grid()
-# plt.show()
-#
-# plt.plot(T, C)
-# plt.title('heatcapacity')
-# plt.xlabel("Temperature")
-# plt.ylabel("sigma_E ^2/ T^2")
-# plt.grid()
-# plt.show()
+plt.figure()
+plt.plot(T, E)
+plt.title('Mean Energy')
+plt.xlabel("Temperature")
+plt.ylabel("Mean energy/n^2")
+plt.grid()
+
+plt.figure()
+plt.plot(T, M)
+plt.title('Abs Mean Magnetization')
+plt.xlabel("Temperature")
+plt.ylabel("Mean absolute Magnetization/n^2")
+plt.grid()
+
+plt.figure()
+plt.plot(T, C)
+plt.title('heatcapacity')
+plt.xlabel("Temperature")
+plt.ylabel("sigma_E ^2/ T^2")
+plt.grid()
+plt.show()
 # mc =  [500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 30000, 40000,50000, 100000]
+"""
 mc = np.arange(0, 100000, step=10000)
 Etemp1 = np.zeros(len(mc)); Mtemp1 =np.zeros(len(mc)); Etemp24 = np.zeros(len(mc)); Mtemp24 =np.zeros(len(mc))
 Etemp1ran = np.zeros(len(mc)); Mtemp1ran =np.zeros(len(mc))
-
+"""
 # for i, s in enumerate(mc):
 #     filename = "outfile%g.txt" %(s)
 #     fil = open(filename, 'r') #reading file
@@ -68,6 +70,7 @@ Etemp1ran = np.zeros(len(mc)); Mtemp1ran =np.zeros(len(mc))
 #     Etemp24[i] = E[14]
 #     Mtemp1[i] = M[0];
 #     Mtemp24[i] = M[14]
+"""
 for i, s in enumerate(mc):
     filename = "outfileran%g.txt" %(s)
     fil = open(filename, 'r') #reading file
@@ -103,3 +106,4 @@ plt.xlabel('Monte Carlo cycles/ time')
 plt.show()
 # plt.plot(Etemp1, np.linspace(0, 19, 19))
 # plt.show()
+"""

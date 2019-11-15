@@ -4,7 +4,7 @@
 #include <cmath>
 #include <string>
 #include "isingmodel.h"
-#include "isingmodel.cpp"
+#include "lib.h"
 
 //must be compiled with lib.cpp and must be run with name of an outputfile
 
@@ -15,6 +15,7 @@ int main(int argc, char* argv[]){
   double mc;
   double w[17], average[5], initial_T, final_T, E, M, T_step;
   outfilename = argv[1];
+  ofstream ofile;
   ofile.open(outfilename);
   cout << "Insert L, dimension of matrix: " << endl;
   cin >> n;
@@ -27,13 +28,14 @@ int main(int argc, char* argv[]){
   long startpoint = -1;
   clock_t start, finish;
   double time_spent;
+  long seed = time(NULL);
   start = clock();
   for(double T= initial_T; T <= final_T; T+=T_step){
     E = M = 0;
     for(int de=-8; de <= 8; de++) w[de+8] = 0;
     for(int de =-8; de <= 8; de+=4)w[de+8] = exp(-de/T);
     for (int i = 0; i < 5; i++) average[i] = 0.;
-    initialize(n,  T, spin_matrix, E, M, false);  //false if we want random spins, true for ordered 
+    initialize(n,  T, spin_matrix, E, M, seed, false);  //false if we want random spins, true for ordered
     for(int cycles=1; cycles <= mc; cycles++){
       metropolis(n, startpoint, spin_matrix, E, M, w);
       average[0] += E;
@@ -43,7 +45,7 @@ int main(int argc, char* argv[]){
       average[4] += fabs(M);
   //    cout << "loop" << cycles << endl; //checing if the loop works
      }
-     writingfunc(n, mc, T, average);
+     writingfunc(n, mc, T, average,ofile);
   }
   finish = clock();
   time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
