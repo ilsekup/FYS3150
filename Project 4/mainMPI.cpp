@@ -72,6 +72,7 @@ int main(int argc, char* argv[]){
      for(int i = 0; i <5; i++){
        MPI_Reduce(&average[i], &total_average[i], 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
      }
+     //save results and print time and current progress
      if(my_rank==0){
        writingfunc(n, mc, temp, total_average, ofile);
        t2 = high_resolution_clock::now();
@@ -79,11 +80,8 @@ int main(int argc, char* argv[]){
        cout << "Time spent on MC = " << t.count() << " seconds, T = " << temp << " L = " << n <<endl;
      }
   }
-  finish = clock();
   free_matrix((void **) spin_matrix);
   ofile.close();
   MPI_Finalize();
-  time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
-  cout << "Time spent: " << time_spent << endl; //time spent on the loops and writing to file
   return 0;
 }

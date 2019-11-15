@@ -12,16 +12,16 @@ PROG = ising
 all : ${MPIPROG} ${PROG}
 
 ${PROG}      : main.o isingmodel.o
-			         	${CPPflags} main.o isingmodel.o -o ${PROG}
+			    ${CPPflags} main.o isingmodel.o -o ${PROG}
 main.o       : main.cpp
-						 		${CPPflags} -c main.cpp
+				${CPPflags} -c main.cpp
 isingmodel.o : isingmodel.cpp
-								${MPICPPflags} -c isingmodel.cpp
+				${MPICPPflags} -c isingmodel.cpp
 
 ${MPIPROG} : mainMPI.o isingmodel.o
-				${MPICPPflags} mainMPI.o isingmodel.o -o ${PROG}
+				${MPICPPflags} mainMPI.o isingmodel.o -o ${MPIPROG}
 mainMPI.o    : mainMPI.cpp
-							${MPICPPflags} -c mainMPI.cpp
+				${MPICPPflags} -c mainMPI.cpp
 
 # TESTPROG = testcode
 # ${TESTPROG} :	 	tests-main.o  test_functions.o isingmodel.o
