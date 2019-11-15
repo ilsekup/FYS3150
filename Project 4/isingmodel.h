@@ -13,5 +13,5 @@ void initialize(int, double, int **, double&, double&, bool);
 inline int periodic(int, int, int);
 void metropolis(int, long&, int**, double&, double&, double*);
 void writingfunc(int, int, double, double*);
-
+void writingfunc2(int , int , double , double*, double *);
 #endif
