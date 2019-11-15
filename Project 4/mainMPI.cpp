@@ -13,7 +13,8 @@ int main(int argc, char* argv[]){
   int n, my_rank, numprocs;
   double mc;
   double w[17], average[5], total_average[5], initial_T, final_T, E, M, T_step;
-
+  clock_t start, finish;
+  double time_spent;
 
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
@@ -24,7 +25,7 @@ int main(int argc, char* argv[]){
     ofile.open(outfilename);
   }
   n = 20;
-  mc = 100000;
+  mc = 1e5;
   int no_intervalls = mc/numprocs;
   int myloop_begin = my_rank*no_intervalls + 1;
   int myloop_end = (my_rank +1)*no_intervalls;
@@ -37,6 +38,10 @@ int main(int argc, char* argv[]){
   MPI_Bcast(&T_step, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   int **spin_matrix = (int**) matrix(n, n, sizeof(int));
   long startpoint = -1-my_rank;
+  initial_T = 1.0;
+  final_T = 3.0;
+  T_step = 0.1;
+  start = clock();
   for(double temp = initial_T; temp <= final_T; temp += T_step) {
     E = M = 0;
     for(int de=-8; de <= 8; de++) w[de+8] = 0;
@@ -59,8 +64,11 @@ int main(int argc, char* argv[]){
        writingfunc(n, mc, temp, total_average);
      }
   }
+  finish = clock();
   free_matrix((void **) spin_matrix);
   ofile.close();
   MPI_Finalize();
+  time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );
+  cout << "Time spent: " << time_spent << endl; //time spent on the loops and writing to file
   return 0;
 }
