@@ -8,6 +8,7 @@
 using namespace std;
 ofstream ofile;
 ofstream ofile2;
+ofstream ofile3;
 
 
 inline int periodic(int i, int limit, int add) {
@@ -93,4 +94,11 @@ void writingfunc2(int n, int mc, double T, double *energy)
   //   ofile2 << setw(15) << setprecision(8) << energy[i] / (n*n) << endl; // energy per particle
   // }
 
+}
+
+void writingfunc3(int n, int mc, double T, double E, double *average, int cycles)
+{
+  ofile3 << setiosflags(ios::showpoint | ios::uppercase);
+  ofile3 << setw(15) << setprecision(8) << cycles; // cycle number
+  ofile3 << setw(15) << setprecision(8) << E / (n*n) << endl; // energy per particle
 }
