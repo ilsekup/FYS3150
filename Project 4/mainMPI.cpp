@@ -15,9 +15,23 @@ int main(int argc, char* argv[]){
   int n, my_rank, numprocs;
   int mc;
   double w[17], average[5], total_average[5], initial_T, final_T, E, M, T_step;
-  initial_T = 2.0;
-  final_T = 2.35;
-  T_step = 0.01;
+
+  // Runs the simulation if there are 3 commandline arguments, tests speed if there are 4 or more
+  if (argc<4){
+    cout << "Use command line arguemnts: output file, number of MC cycles and L (number of spins per dimension)" << endl;
+    return 0;
+  }
+  else if(argc==4){
+    initial_T = 2.0;
+    final_T = 2.35;
+    T_step = 0.01;
+  } else if(argc>=5){
+    initial_T = 1.5;
+    final_T = 2.3;
+    T_step = 0.8;
+  }
+
+  
 
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
