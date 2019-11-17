@@ -25,8 +25,14 @@ def load_plot_mpi():
     plt.ylabel(r"$\sigma_E^2/ T^2$")
     plt.grid()
 
+    plt.figure('X')
+    plt.title('Suceptibility')
+    plt.xlabel("Temperature")
+    plt.ylabel(r"$\sigma_M^2/T^2$")
+    plt.grid()
+
     for L in np.arange(40,101,20):
-        filename = f"outfile_MPI_L{L}_n1e6.txt"
+        filename = f"outfile_MPI_L{L}.txt"
         fil = open(filename, 'r') #reading file
         lines = fil.readlines()
         l = len(lines)
@@ -56,15 +62,25 @@ def load_plot_mpi():
         plt.figure('hc')
         plt.plot(T, C,label=f"L = {L}")
 
+        plt.figure('X')
+        plt.plot(T, X,label=f"L = {L}")
+
     plt.figure('E')
     plt.legend()
+    plt.savefig("Energy.pdf")
 
     plt.figure('Mag')
     plt.legend()
+    plt.savefig("Magnetism.pdf")
 
     plt.figure('hc')
     plt.legend()
+    plt.savefig("Heatcapacity.pdf")
 
+    plt.figure('X')
+    plt.legend()
+    plt.savefig("Susceptibility.pdf")
+    
     plt.show()
 
 load_plot_mpi()

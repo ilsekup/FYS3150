@@ -16,7 +16,7 @@ int main(int argc, char* argv[]){
   int mc;
   double w[17], average[5], total_average[5], initial_T, final_T, E, M, T_step;
   initial_T = 2.0;
-  final_T = 2.3;
+  final_T = 2.35;
   T_step = 0.01;
 
   MPI_Init(&argc, &argv);
