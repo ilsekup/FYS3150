@@ -4,7 +4,7 @@
 #include <cmath>
 #include <string>
 #include "isingmodel.h"
-#include "isingmodel.cpp"
+#include "lib.h"
 
 //must be compiled with lib.cpp and must be run with name of an outputfile
 
@@ -16,6 +16,9 @@ int main(int argc, char* argv[]){
   double w[17], average[5], initial_T, final_T, E, M, T_step, energy[3];
 ;
   outfilename = argv[1];
+  ofstream ofile;
+  ofstream ofile2;
+  ofstream ofile3;
   ofile.open(outfilename);
   ofile2.open("temp.txt");
   ofile3.open("histdata.txt");
@@ -48,7 +51,7 @@ int main(int argc, char* argv[]){
       average[3] += M*M;
       average[4] += fabs(M);
      }
-     writingfunc(n, mc, T, average);
+     writingfunc(n, mc, T, average,ofile);
   }
   bool timeplot = false; //this loop is only needed for exercise c, for the time dependence
   if(timeplot == true){
@@ -66,7 +69,7 @@ int main(int argc, char* argv[]){
       energy[3] += fabs(M2);
 
     }
-    writingfunc2(n, sweep, Tlone, energy);
+    writingfunc2(n, sweep, Tlone, energy, ofile2);
   }
 }
 E = M = 0;
@@ -79,7 +82,7 @@ initialize(n,  Tlone, spin_matrix, E, M, seed, false);  //false if we want rando
     double energy = E;
     average[0] += E;
     average[1] += E*E;
-    writingfunc3(n, mc, Tlone, energy, average, cycles);
+    writingfunc3(n, mc, Tlone, energy, average, cycles, ofile3);
     }
   finish = clock();
   time_spent = ( (double)(finish - start)/ CLOCKS_PER_SEC );

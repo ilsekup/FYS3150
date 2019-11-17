@@ -35,3 +35,7 @@
 # Data files
 *.data
 *.txt
+
+#Compiled
+*isingmpi
+*ising
