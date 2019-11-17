@@ -6,7 +6,7 @@
 #include "isingmodel.h"
 #include "lib.h"
 
-//must be compiled with lib.cpp and must be run with name of an outputfile
+//must be compiled with lib.cpp and isingmodel.cpp and must be run with name of an outputfile
 
 using namespace std;
 int main(int argc, char* argv[]){
