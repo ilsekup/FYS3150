@@ -89,9 +89,7 @@ void writingfunc2(int n, int mc, double T, double *energy, ostream& ofile2)
   ofile2 << setiosflags(ios::showpoint | ios::uppercase);
   ofile2 << setw(15) << setprecision(8) << Eaverage/(n*n);
   ofile2 << setw(15) << setprecision(8) << Mabsaverage/(n*n) << endl;
-  // for(int i; i < mc; i++){
-  //   ofile2 << setw(15) << setprecision(8) << energy[i] / (n*n) << endl; // energy per particle
-  // }
+
 
 }
 
