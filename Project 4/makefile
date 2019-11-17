@@ -9,6 +9,7 @@ MPICPPflags = mpic++ -O3 lib.cpp
 
 MPIPROG = mpi_ising
 PROG = ising
+TESTPROG = testcode
 all: ${MPIPROG} ${PROG} ${TESTPROG}
 
 ${PROG}      : main.o isingmodel.o
@@ -23,7 +24,6 @@ ${MPIPROG} : mainMPI.o isingmodel.o
 mainMPI.o    : mainMPI.cpp
 				${MPICPPflags} -c mainMPI.cpp
 
-TESTPROG = testcode
 ${TESTPROG} :	 	tests-main.o  test_functions.o isingmodel.o
 			${CPPflags} tests-main.o test_functions.o isingmodel.o ${LIB} -o ${TESTPROG}
 
