@@ -35,6 +35,7 @@ def plot_mpi():
 
     i = 0
     max_T = []
+    max_T_hc = []
     L_ = []
     for L in np.arange(40,101,20):
         filename = f"outfile_MPI_L{L}.txt"
@@ -66,8 +67,11 @@ def plot_mpi():
         plt.plot(T, M,'x',label=f"L = {L}")
 
         plt.figure('hc')
+        fhc = interp1d(T,C, kind = 'cubic')
         plt.plot(T, C,f"xC{i}", label=f"L = {L}")
-       
+        plt.plot(T_cubic,fhc(T_cubic),f'--C{i}')
+        max_T_hc.append(T_cubic[np.argmax(fhc(T_cubic))])
+
         plt.figure('X')
         # Using cubic splines to get a better estimate of T_C
         fX = interp1d(T, X, kind='cubic')
@@ -97,18 +101,36 @@ def plot_mpi():
     L_inv = 1/np.array(L_)
     #Fit 1/T to T_C
     p,covmat = np.polyfit(L_inv,max_T,1,full = False, cov = True)
-    plt.plot(L_inv,max_T,'xb')
+    p_hc,covmat_hc = np.polyfit(L_inv,max_T_hc,1,full = False, cov = True)
+
+    plt.plot(L_inv,max_T,'xb', label = r"Data from $\chi$")
+    plt.plot(L_inv,max_T_hc,'xr', label = "Data from heatcapacity")
+
     points = np.array([0,np.max(L_inv)])
     line = np.polyval(p,points)
+    line_hc = np.polyval(p_hc,points)
+
     plt.plot(points,line,'--b')
+    plt.plot(points,line_hc,'--r')
+
     b = p[-1]
+    b_hc = p_hc[-1]
+
     sigma_b = np.sqrt(covmat[-1,-1])
-    print(f"Line intercept = {b} ± {sigma_b}")
+    sigma_b_hc = np.sqrt(covmat_hc[-1,-1])
+
+    print(f"Line intercept from chi = {b} ± {sigma_b}")
+    print(f"Line intercept from heatcapacity = {b_hc} ± {sigma_b_hc}")
     act_val = 2/np.log(1+np.sqrt(2))
     sig_dist = np.abs(b-act_val)/sigma_b
+    sig_dist_hc = np.abs(b_hc-act_val)/sigma_b_hc
     plt.xlabel("1/L")
     plt.ylabel(r"$T_C$")
-    print(f"{sig_dist:.1f} sigma from the true value")
+    print(f"{sig_dist:.1f} sigma from the true value (chi)")
+    print(f"{sig_dist_hc:.1f} sigma from the true value (heatcapacity)")
+
+    plt.legend()
+    plt.grid()
     plt.savefig("TC.pdf")
 
     plt.show()
@@ -163,8 +185,8 @@ def plot_mpi_timing():
     plt.show()
 
 
-#plot_mpi()
-plot_mpi_timing()
+plot_mpi()
+#plot_mpi_timing()
 """
 Plotting of the energy and magnetization over time
 
