@@ -70,13 +70,14 @@ int main(int argc, char* argv[]){
       t1 = high_resolution_clock::now();
     }
     E = M = 0;
+    int counter = 0;
     for(int de=-8; de <= 8; de++) w[de+8] = 0;
     for(int de =-8; de <= 8; de+=4)w[de+8] = exp(-de/temp);
     for (int i = 0; i < 5; i++) average[i] = 0.;
     for(int i = 0; i < 5; i++) total_average[i] = 0.;
     initialize(n,  temp, spin_matrix, E, M, seed, false);  //false if we want random spins, true for ordered
     for(int cycles=1; cycles <= mc_per_proc; cycles++){
-      metropolis(n, startpoint, spin_matrix, E, M, w);
+      metropolis(n, startpoint, spin_matrix, E, M, w, counter);
       average[0] += E;
       average[1] += E*E;
       average[2] += M;
