@@ -44,14 +44,20 @@ void initialize(int n, double T, int **spin_matrix, double& E, double& M, long s
   }
 }
 
-void metropolis(int n, long& startpoint, int **spin_matrix, double& E, double& M, double *w){
-  for(int y = 0; y < n; y++){
-    for(int x=0; x < n; x++){
+void metropolis(int n, long& startpoint, int **spin_matrix, double& E, double& M,\
+   double *w, int& counter)
+{
+  for(int y = 0; y < n; y++)
+  {
+    for(int x=0; x < n; x++)
+    {
       int ix = (int)(ran1(&startpoint)*(double)n);
       int iy = (int)(ran1(&startpoint)*(double)n);
       int dE = 2*spin_matrix[iy][ix]*(spin_matrix[iy][periodic(ix, n, -1)] + spin_matrix[periodic(iy, n,-1)][ix]
     + spin_matrix[iy][periodic(ix, n, 1)] + spin_matrix[periodic(iy, n, 1)][ix]);
-    if(ran1(&startpoint) <= w[dE+8]){
+    if(ran1(&startpoint) <= w[dE+8])
+      {
+      counter += 1; // counts every time a move is accepted
       spin_matrix[iy][ix] *= -1;
       M += (double) 2*spin_matrix[iy][ix];
       E += (double) dE;
@@ -80,19 +86,18 @@ void writingfunc(int n, int mc, double T, double *average, ostream& ofile)
   ofile << setw(15) << setprecision(8) << Mabsaverage/(n*n) << endl;
 }
 
-void writingfunc2(int n, int mc, double T, double *energy, ostream& ofile2)
+void writingfunc2(int n, int mc, double T, double *energy, int counts, ostream& ofile2)
 {
   double norm = 1/((double) (mc)); // divided by total number of cycles
   double Eaverage = energy[0]*norm;
   double E2average = energy[1]*norm;
   double Mabsaverage = energy[3]*norm;
   ofile2 << setiosflags(ios::showpoint | ios::uppercase);
+  ofile2 << setw(15) << setprecision(8) << mc;
   ofile2 << setw(15) << setprecision(8) << Eaverage/(n*n);
-  ofile2 << setw(15) << setprecision(8) << Mabsaverage/(n*n) << endl;
-
-
+  ofile2 << setw(15) << setprecision(8) << Mabsaverage/(n*n);
+  ofile2 << setw(15) << setprecision(8) << counts << endl;
 }
-
 void writingfunc3(int n, int mc, double T, double E, double *average, int cycles, ostream& ofile3)
 {
   ofile3 << setiosflags(ios::showpoint | ios::uppercase);
