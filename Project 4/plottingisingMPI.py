@@ -187,32 +187,3 @@ def plot_mpi_timing():
 
 plot_mpi()
 #plot_mpi_timing()
-"""
-Plotting of the energy and magnetization over time
-
-filename = "temp.txt"
-fil = open(filename, 'r') #reading file
-lines = fil.readlines() #splitting in lines
-length  = len(lines)
-E = []
-M = []
-for line in (lines):
-    E.append(float(line.split()[1]))
-    M.append(float(line.split()[-1]))
-fil.close()
-E = np.array(E)
-M = np.array(M)
-x = np.arange(1, 10000, 10)
-fig, axs = plt.subplots(2, sharex=True)
-fig.suptitle('Temperature T=1.0 ')
-axs[0].plot(x, E, label='ordered')
-axs[0].set_title('Energy')
-axs[0].legend()
-axs[0].set_ylabel('Energy/J')
-axs[1].plot(x, M, label='ordered')
-axs[1].set_title('Magnetization')
-axs[1].legend()
-axs[1].set_ylabel('|M|')
-plt.xlabel('Monte Carlo cycles/ time')
-plt.show()
-"""
