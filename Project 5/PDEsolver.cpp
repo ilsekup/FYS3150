@@ -14,15 +14,14 @@ ofstream ofile("explicit.txt", ios::out);
 
 
 
-void writingfunc(int n,int& j, vec u_t, ostream& ofile)
+void writingfunc(int n, vec u_t, ostream& ofile)
 {
 ofile << setiosflags(ios::showpoint | ios::uppercase);
 for (int k = 0; k <= n; k++)
   {
-    ofile << setw(15) << setprecision(8) << u_t(k); // writes u for all x
+    ofile << setw(15) << setprecision(8) << u_t(k ); // writes u for all x 
   }
-  ofile << setw(15) << setprecision(8) << j; // temp iteration, last element in row
-  ofile << setw(15) << setprecision(8) << '\n' << endl;
+  ofile << endl;
 }
 
 //explicit
@@ -43,32 +42,36 @@ vec u_t = zeros<vec>(n+1);
 u_xx(0) = u_t(0) = 0.0;
 u_xx(n) = u_t(n) = 1.0;
 
-for (int j = 1; j < t_steps; j++) // iterating over temperatures
+writingfunc(n, u_t, ofile); // to write first line at i,j = 0
+for (int j = 1; j < t_steps + 1; j++) // iterating over temperatures
   {
     for (int i = 1; i < n; i++) // iterating over x-position
     {
     u_t(i) = alpha*( u_xx(i-1) + u_xx(i+1) ) + (1 - 2*alpha) * u_xx(i);
     u_xx(i) = u_t(i);
     }
-    writingfunc(n,j, u_t, ofile);
+    writingfunc(n, u_t, ofile);
   }
 
 }
 
 int main(int argc, char* argv[])
 {
+  //setup for writing in to file
   char *outfilename;
   outfilename = argv[1];
   ofstream ofile;
   ofile.open("explicit.txt");
-  int n, t; // number of steps in x and t respectively.
 
+  //choosing n ad t steps
+  int n, t; // number of steps in x and t respectively.
   cout << "n = " << endl;
   cin >> n;
   cout << "t = " << endl;
   cin >> t;
-  explicitsch(n,t);
 
+  //calling function which also does the writing into file
+  explicitsch(n,t);
   ofile.close();
   return 0;
 }
