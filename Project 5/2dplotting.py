@@ -22,7 +22,6 @@ values = []
 i = 0
 for line in lines:
     if line == '\n':
-        print("yes")
         arr = np.zeros(dims)
         values.append(arr)
         i = 0
