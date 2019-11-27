@@ -181,7 +181,7 @@ double *implicit(int n, double t_steps){
      }
   }
   ofile.close();
-  return vinitial;
+  return vold;
 }
 
 // void CN(int n){
