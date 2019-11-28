@@ -10,13 +10,6 @@
 using namespace std;
 using namespace arma;
 
-ofstream ofile("explicit.txt", ios::out);
-ofstream ofile2("implicit.txt", ios::out);
-ofstream ofile3("explicit2D.txt", ios::out);
-
-
-
-
 void writingfunc1D(int n, vec u_t, ostream& ofile)
 {
   ofile << setiosflags(ios::showpoint | ios::uppercase);
@@ -26,8 +19,6 @@ void writingfunc1D(int n, vec u_t, ostream& ofile)
     }
   ofile << endl;
 }
-
-
 
 void writingfunc2D(int n, mat u_t, ostream& ofile3)
 {
@@ -54,6 +45,7 @@ void explicitsch1D(int n, int t_steps)
   double dx = 1.0 / (n+1);
   double dt = 1.0 /(t_steps);
   double alpha = dt / ( dx * dx);
+  ofstream ofile("explicit.txt", ios::out);
 
   // setting up vectors and initial/bouandry conditions
   vec u_xx = zeros<vec>(n+1);
@@ -81,6 +73,7 @@ void explicitsch2D(int n, int t_steps)
   // setting up steplength in x = y and t
   double dx = 1.0 / (n+1); //dy = dx , alpha is the same for both as well
   double alpha = dt / ( dx * dx);
+  ofstream ofile("explicit2d.txt", ios::out);
 
   // setting up vectors/matrices and initial/bouandry conditions
   mat u_yx = zeros<mat>(n+1,n+1);
@@ -102,10 +95,10 @@ void explicitsch2D(int n, int t_steps)
 
   u_t = u_yx; //setting matrices equal to each other so they have the same initial/bouandry conditions
 
-  ofile3 << setiosflags(ios::showpoint | ios::uppercase);
-  ofile3 << n+1 << endl;
+  ofile << setiosflags(ios::showpoint | ios::uppercase);
+  ofile << n+1 << endl;
 
-  writingfunc2D(n, u_t, ofile3); // to write first line at i,j = 0
+  writingfunc2D(n, u_t, ofile); // to write first line at i,j = 0
 
   for (int j = 1; j < t_steps; j++) // iterating over temperatures
   {
@@ -118,9 +111,9 @@ void explicitsch2D(int n, int t_steps)
         }
     }
 
-    writingfunc2D(n, u_t, ofile3);
+    writingfunc2D(n, u_t, ofile);
   }
-  ofile3.close();
+  ofile.close();
 }
 
 void writingfunc2(int n, double *u, ostream& ofile){
@@ -172,6 +165,7 @@ double *implicit(int n, double t_steps){
   double *vold = new double[n+2];
   double *vnew = new double[n+2];
   double *vinitial = new double[n+2];
+  ofstream ofile2("implicit.txt", ios::out);
   double *a = new double[n];
   double *b = new double[n];
   double *c = new double[n];
@@ -196,36 +190,42 @@ double *implicit(int n, double t_steps){
 
      }
   }
-  ofile.close();
+  ofile2.close();
   return vold;
 }
 
 // One-dimensional Crank–Nicolson
 void CN(int n, double dt, int t_steps, ostream& ofile){
+  // n is the number of point exluding boundaries
+  // We therefor have a total of n+2 points
+  // results are printed to ofile
   double dx = 1/(double) (n+1);
   double alpha = dt / (double) (dx*dx);
+  // Allocate required vectors
   double *v = new double[n+2];
   double *v_tilde = new double[n+2];
-  double *a = new double[n+1];
+  double *a = new double[n+1]; // vecor a (and c) are one shorter, as they are off-diagonal
   double *b = new double[n+2];
   double *c = new double[n+1];
   double b_start = 2 + 2*alpha;;
   double _2minus2alpha = 2.0 - 2.0*alpha; // precalculated for speed
 
-  // Initialize values
   for(int i=1; i<n+1; i++){
+    // Set initial conditions and b vector
     b[i] = b_start;
     v[i] = 0;
   }
+  // Set up boundary conditions
   b[0] = b[n+1] = 1;
   v[0] = 0;
   v[n+1] = 1;
 
+  // Set up a and c vector
   for(int i=1; i<n; i++) a[i] = c[i] = -alpha;
   a[n] = c[0] = 0;
   a[0] = c[n] = -alpha;
 
-  writingfunc2(n+2, v, ofile2);
+  writingfunc2(n+2, v, ofile);
 
   // Solve for time
   for(int t=0; t<t_steps; t++){
@@ -239,7 +239,9 @@ void CN(int n, double dt, int t_steps, ostream& ofile){
     }
     b[0] = b[n+1] = 1;
 
+    // Second step of Cranck-Nicolson
     solver_Thomas2(a,b,c,v,v_tilde,n+2);
-    writingfunc2(n+2, v, ofile2);
+    // Save reusults
+    writingfunc2(n+2, v, ofile);
   }
 }
