@@ -10,16 +10,6 @@
 using namespace std;
 using namespace arma;
 
-void writingfunc1D(int n, vec u_t, ostream& ofile)
-{
-  ofile << setiosflags(ios::showpoint | ios::uppercase);
-  for (int k = 0; k <= n; k++)
-    {
-      ofile << setw(15) << setprecision(8) << u_t(k); // writes u for all x
-    }
-  ofile << endl;
-}
-
 void writingfunc2D(int n, mat u_t, ostream& ofile3)
 {
   ofile3 << setiosflags(ios::showpoint | ios::uppercase);
@@ -53,7 +43,7 @@ void explicitsch1D(int n, int t_steps)
   u_xx(0) = u_t(0) = 0.0;
   u_xx(n) = u_t(n) = 1.0;
 
-  writingfunc1D(n, u_t, ofile); // to write first line at i,j = 0
+  u_t.t().raw_print(ofile); // to write first line at i,j = 0
   for (int j = 1; j < t_steps + 1; j++) // iterating over temperatures
     {
       for (int i = 1; i < n; i++) // iterating over x-position
@@ -61,7 +51,7 @@ void explicitsch1D(int n, int t_steps)
       u_t(i) = alpha*( u_xx(i-1) + u_xx(i+1) ) + (1 - 2*alpha) * u_xx(i);
       u_xx(i) = u_t(i);
       }
-      writingfunc1D(n, u_t, ofile);
+      u_t.t().raw_print(ofile);
   }
   ofile.close();
 }
@@ -116,7 +106,7 @@ void explicitsch2D(int n, int t_steps)
   ofile.close();
 }
 
-void writingfunc2(int n, double *u, ostream& ofile){
+void writingfunc(int n, double *u, ostream& ofile){
   ofile << setiosflags(ios::showpoint | ios::uppercase);
   for (int k = 0; k < n; k++)
   {
@@ -125,33 +115,17 @@ void writingfunc2(int n, double *u, ostream& ofile){
   ofile << endl;
 }
 
-void solver_Thomas(double *a, double *b, double *c, double *vold, double *vnew, int n){
-    // Solves the matrix problem (for tridiagonal matrix)
-    double *bt = new double[n];
-    double *voldt = new double[n];
-    bt[0] = b[0];
-    voldt[0] = vold[0];
-    for(int i = 1; i < n; i++){
-        bt[i] = b[i] - c[i-1]*a[i-1]/bt[i-1]; // 3 FLOPS
-        voldt[i] = vold[i]- voldt[i-1]*a[i-1]/bt[i-1]; // 3 FLOPS
-    }
-    vnew[n-1] = voldt[n-1]/bt[n-1]; // 1 FLOP
-    for(int i = n-2; i>=0; i--){
-      vnew[i] = (voldt[i]-vnew[i+1]*c[i])/bt[i];// 3 FLOPS
-    }
-    // sum 9N + 1 FLOP
-}
-
-void solver_Thomas2(double* a, double* b, double* c, double* u, double* v, int n){
+void solver_Thomas(double* a, double* b, double* c, double* u, double* v, int n){
     // Solves the matrix problem Av=u (for tridiagonal matrix A with a, b and c along the diagonal)
     // Vectors b,v and u must be n long, while a and c are n-1 long (as they are the off diagonal elements)
     // Overwrites b, u and v
 
+    // Forwards substitution
     for(int i = 1; i < n; i++){
       b[i] -= a[i-1]*c[i-1]/b[i-1];
       u[i] -= u[i-1]*a[i-1]/b[i-1];
     }
-
+    // Backwards substitution
     v[n-1] = u[n-1]/b[n-1];
     for(int i = n-2; i>=0; i--){
       v[i] = (u[i]-v[i+1]*c[i])/b[i];
@@ -185,8 +159,8 @@ double *implicit(int n, double t_steps){
   b[0] = b[n+1] = 1;
 
   for(int t = 1; t < t_steps; t++){
-    writingfunc2(n+2, vnew, ofile2);
-    solver_Thomas2(a, b, c, vold, vnew, n+2);
+    writingfunc(n+2, vnew, ofile2);
+    solver_Thomas(a, b, c, vold, vnew, n+2);
     vnew[0] = 0;
     vnew[n+1] = 1;
     for(int i = 0; i <= n; i++){
@@ -230,7 +204,7 @@ void CN(int n, double dt, int t_steps, ostream& ofile){
   a[n] = c[0] = 0;
   a[0] = c[n] = -alpha;
 
-  writingfunc2(n+2, v, ofile);
+  writingfunc(n+2, v, ofile);
 
   // Solve for time
   for(int t=0; t<t_steps; t++){
@@ -245,8 +219,8 @@ void CN(int n, double dt, int t_steps, ostream& ofile){
     b[0] = b[n+1] = 1;
 
     // Second step of Cranck-Nicolson
-    solver_Thomas2(a,b,c,v_tilde,v,n+2);
+    solver_Thomas(a,b,c,v_tilde,v,n+2);
     // Save reusults
-    writingfunc2(n+2, v, ofile);
+    writingfunc(n+2, v, ofile);
   }
 }
