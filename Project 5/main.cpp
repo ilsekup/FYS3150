@@ -31,5 +31,6 @@ int main(int argc, char* argv[])
   implicit(n, t);
   explicitsch2D(n,t);
   CN(n,dt,t,ofile);
+  ofile.close();
   return 0;
 }
