@@ -100,14 +100,14 @@ void explicitsch2D(int n, int t_steps)
   u_yx(n,n) = 1;
   u_yx(0,0) = 1;
 
-u_t = u_yx; //setting matrices equal to each other so they have the same initial/bouandry conditions
+  u_t = u_yx; //setting matrices equal to each other so they have the same initial/bouandry conditions
 
-ofile3 << setiosflags(ios::showpoint | ios::uppercase);
-ofile3 << n+1 << endl;
+  ofile3 << setiosflags(ios::showpoint | ios::uppercase);
+  ofile3 << n+1 << endl;
 
-writingfunc2D(n, u_t, ofile3); // to write first line at i,j = 0
+  writingfunc2D(n, u_t, ofile3); // to write first line at i,j = 0
 
-for (int j = 1; j < t_steps; j++) // iterating over temperatures
+  for (int j = 1; j < t_steps; j++) // iterating over temperatures
   {
     for (int i = 1; i < n; i++) // iterating over x-position
     {
