@@ -19,11 +19,11 @@ ofstream ofile3("explicit2D.txt", ios::out);
 
 void writingfunc1D(int n, vec u_t, ostream& ofile)
 {
-ofile << setiosflags(ios::showpoint | ios::uppercase);
-for (int k = 0; k <= n; k++)
-  {
-    ofile << setw(15) << setprecision(8) << u_t(k); // writes u for all x
-  }
+  ofile << setiosflags(ios::showpoint | ios::uppercase);
+  for (int k = 0; k <= n; k++)
+    {
+      ofile << setw(15) << setprecision(8) << u_t(k); // writes u for all x
+    }
   ofile << endl;
 }
 
@@ -31,16 +31,16 @@ for (int k = 0; k <= n; k++)
 
 void writingfunc2D(int n, mat u_t, ostream& ofile3)
 {
-ofile3 << setiosflags(ios::showpoint | ios::uppercase);
+  ofile3 << setiosflags(ios::showpoint | ios::uppercase);
 
-for (int i = 0; i <= n; i++)
-  {
-    ofile3 << endl;
-    for (int k = 0; k <= n; k++)
+  for (int i = 0; i <= n; i++)
     {
-    ofile3 << setw(15) << setprecision(8) << u_t(i,k); // writes u for all x
+      ofile3 << endl;
+      for (int k = 0; k <= n; k++)
+      {
+      ofile3 << setw(15) << setprecision(8) << u_t(i,k); // writes u for all x
+      }
     }
-  }
   ofile3 << endl;
 }
 
@@ -78,17 +78,17 @@ void explicitsch1D(int n, int t_steps)
 void explicitsch2D(int n, int t_steps)
 {
   double dt = 1.0 /(t_steps);
-// setting up steplength in x = y and t
-double dx = 1.0 / (n+1); //dy = dx , alpha is the same for both as well
-double alpha = dt / ( dx * dx);
+  // setting up steplength in x = y and t
+  double dx = 1.0 / (n+1); //dy = dx , alpha is the same for both as well
+  double alpha = dt / ( dx * dx);
 
-// setting up vectors/matrices and initial/bouandry conditions
-mat u_yx = zeros<mat>(n+1,n+1);
-mat u_t = zeros<mat>(n+1,n+1);
+  // setting up vectors/matrices and initial/bouandry conditions
+  mat u_yx = zeros<mat>(n+1,n+1);
+  mat u_t = zeros<mat>(n+1,n+1);
 
 
-//these conditions imply that the left and right side of the lattice is 1, 0 everywhere else
-for(int i = 0; i < n + 1 ; i++)
+  //these conditions imply that the left and right side of the lattice is 1, 0 everywhere else
+  for(int i = 0; i < n + 1 ; i++)
   {
     u_yx(i,0) = 1.0;
     u_yx(i,n) = 1.0;
