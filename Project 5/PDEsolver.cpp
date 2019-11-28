@@ -120,12 +120,13 @@ for (int j = 1; j < t_steps; j++) // iterating over temperatures
 }
 void writingfunc2(int n, double *u, ostream& ofile){
   ofile << setiosflags(ios::showpoint | ios::uppercase);
-  for (int k = 0; k <= n; k++)
+  for (int k = 0; k < n; k++)
   {
     ofile << setw(15) << setprecision(8) << u[k]; // writes u for all x
   }
   ofile << endl;
 }
+
 void solver_Thomas(double *a, double *b, double *c, double *vold, double *vnew, int n){
     // Solves the matrix problem (for tridiagonal matrix)
     double *bt = new double[n+1];
@@ -141,6 +142,22 @@ void solver_Thomas(double *a, double *b, double *c, double *vold, double *vnew, 
       vnew[i] = (voldt[i]-vnew[i+1]*c[i])/bt[i];// 3 FLOPS
     }
     // sum 9N + 1 FLOP
+}
+
+void solver_Thomas2(double* a, double* b, double* c, double* v, double* u, int n){
+    // Solves the matrix problem Av=u (for tridiagonal matrix A with a, b and c along the diagonal)
+    // Vectors b,v and u must be n long, while a and c are n-1 long (as they are the off diagonal elements)
+    // Overwrites b, u and v
+
+    for(int i = 1; i < n; i++){
+      b[i] -= a[i-1]*c[i-1]/b[i-1];
+      u[i] -= u[i-1]*a[i-1]/b[i-1];
+    }
+
+    v[n-1] = u[n-1]/b[n-1];
+    for(int i = n-2; i>=0; i--){
+      v[i] = (u[i]-v[i+1]*c[i])/b[i];
+    }
 }
 
 void implicit(int n, double t_steps){
@@ -174,17 +191,58 @@ void implicit(int n, double t_steps){
   }
 }
 
-// void CN(int n){
-//
-// }
+// One-dimensional Crank–Nicolson
+void CN(int n, double dt, int t_steps, ostream& ofile){
+  double dx = 1/(double) (n+1);
+  double alpha = dt / (double) (dx*dx);
+  double *v = new double[n+2];
+  double *v_tilde = new double[n+2];
+  double *a = new double[n+1];
+  double *b = new double[n+2];
+  double *c = new double[n+1];
+  double b_start = 2 + 2*alpha;;
+  double _2minus2alpha = 2.0 - 2.0*alpha; // precalculated for speed
+
+  // Initialize values
+  for(int i=1; i<n+1; i++){
+    b[i] = b_start;
+    v[i] = 0;
+  }
+  b[0] = b[n+1] = 1;
+  v[0] = 0;
+  v[n+1] = 1;
+
+  for(int i=1; i<n; i++) a[i] = c[i] = -alpha;
+  a[n] = c[0] = 0;
+  a[0] = c[n] = -alpha;
+
+  writingfunc2(n+2, v, ofile2);
+
+  // Solve for time
+  for(int t=0; t<t_steps; t++){
+    // Find v_tilde
+    v_tilde[0] = v[0];
+    v_tilde[n+1] = v[n+1];
+    for(int j=1; j<=n; j++){
+      v_tilde[j] = alpha*v[j-1] + _2minus2alpha * v[j] + alpha*v[j+1];
+      //Reset b
+      b[j] = b_start;
+    }
+    b[0] = b[n+1] = 1;
+
+    solver_Thomas2(a,b,c,v,v_tilde,n+2);
+    writingfunc2(n+2, v, ofile2);
+  }
+
+}
 
 int main(int argc, char* argv[])
 {
   //setup for writing in to file
   char *outfilename;
   outfilename = argv[1];
-  ofstream ofile;
-  ofile.open("explicit.txt");
+  //ofstream ofile;
+  //ofile.open("explicit.txt");
 
   //choosing n ad t steps
   int n, t; // number of steps in x and t respectively.
@@ -192,11 +250,14 @@ int main(int argc, char* argv[])
   cin >> n;
   cout << "t = " << endl;
   cin >> t;
+  double dx = 1/(double) (n+1);
+  double dt = 0.5*dx*dx;
 
   //calling function which also does the writing into file
-  explicitsch(n,t);
-  implicit(n, t);
-  explicitsch2D(n,t);
+  //explicitsch(n,t);
+  //implicit(n, t);
+  //explicitsch2D(n,t);
+  CN(n,dt,t,ofile);
   ofile.close();
   return 0;
 }
