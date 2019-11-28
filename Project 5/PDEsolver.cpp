@@ -127,22 +127,22 @@ void writingfunc2(int n, double *u, ostream& ofile){
 
 void solver_Thomas(double *a, double *b, double *c, double *vold, double *vnew, int n){
     // Solves the matrix problem (for tridiagonal matrix)
-    double *bt = new double[n+1];
-    double *voldt = new double[n+1];
-    bt[1] = b[1];
-    voldt[1] = vold[1];
-    for(int i = 2; i < n+1; i++){
+    double *bt = new double[n];
+    double *voldt = new double[n];
+    bt[0] = b[0];
+    voldt[0] = vold[0];
+    for(int i = 1; i < n; i++){
         bt[i] = b[i] - c[i-1]*a[i-1]/bt[i-1]; // 3 FLOPS
         voldt[i] = vold[i]- voldt[i-1]*a[i-1]/bt[i-1]; // 3 FLOPS
     }
-    vnew[n] = voldt[n]/bt[n]; // 1 FLOP
-    for(int i = n-1; i>0; i--){
+    vnew[n-1] = voldt[n-1]/bt[n-1]; // 1 FLOP
+    for(int i = n-2; i>=0; i--){
       vnew[i] = (voldt[i]-vnew[i+1]*c[i])/bt[i];// 3 FLOPS
     }
     // sum 9N + 1 FLOP
 }
 
-void solver_Thomas2(double* a, double* b, double* c, double* v, double* u, int n){
+void solver_Thomas2(double* a, double* b, double* c, double* u, double* v, int n){
     // Solves the matrix problem Av=u (for tridiagonal matrix A with a, b and c along the diagonal)
     // Vectors b,v and u must be n long, while a and c are n-1 long (as they are the off diagonal elements)
     // Overwrites b, u and v
@@ -159,36 +159,41 @@ void solver_Thomas2(double* a, double* b, double* c, double* v, double* u, int n
 }
 
 double *implicit(int n, double t_steps){
-  double dx = 1/double(n);
+  double dx = 1/(double)(n+1);
   double dt = 0.5*dx*dx;
   double alpha = dt/(dx*dx);
   double *vold = new double[n+2];
   double *vnew = new double[n+2];
-  double *vinitial = new double[n+2];
   ofstream ofile2("implicit.txt", ios::out);
-  double *a = new double[n];
-  double *b = new double[n];
-  double *c = new double[n];
+  double *a = new double[n+1];
+  double *b = new double[n+2];
+  double *c = new double[n+1];
   //initial and boundary conditions
-  for(int j = 0; j< n; j++){
-    vold[j] = 0;
+  for(int j = 0; j <= n; j++){
+    vold[j] = vnew[j] = 0;
   }
-  for(int i= 0; i <= n; i++){
-    vnew[0] = vold[0] = 0;
-    vnew[n] = vold[n] = 1;
+
+  vnew[0] = vold[0] = 0;
+  vnew[n+1] = vold[n+1] = 1;
+
+  for(int i=1; i<=n; i++){
     c[i] = a[i] = -alpha;
     b[i] = 1 + alpha*2;
-    vinitial[i] = vold[i];
   }
+  a[n] = c[0] = 0;
+  a[0] = c[n] = -alpha;
+  b[0] = b[n+1] = 1;
+
   for(int t = 1; t < t_steps; t++){
-    writingfunc2(n, vnew, ofile2);
-    solver_Thomas(a, b, c, vold, vnew, n);
+    writingfunc2(n+2, vnew, ofile2);
+    solver_Thomas2(a, b, c, vold, vnew, n+2);
     vnew[0] = 0;
-    vnew[n] = 1;
+    vnew[n+1] = 1;
     for(int i = 0; i <= n; i++){
       vold[i] = vnew[i];
-
-     }
+      b[i] = 1 + alpha*2;
+    }
+    b[0] = b[n+1] = 1;
   }
   ofile2.close();
   return vold;
@@ -240,7 +245,7 @@ void CN(int n, double dt, int t_steps, ostream& ofile){
     b[0] = b[n+1] = 1;
 
     // Second step of Cranck-Nicolson
-    solver_Thomas2(a,b,c,v,v_tilde,n+2);
+    solver_Thomas2(a,b,c,v_tilde,v,n+2);
     // Save reusults
     writingfunc2(n+2, v, ofile);
   }

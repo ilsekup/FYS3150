@@ -18,9 +18,9 @@ int main(int argc, char* argv[])
 
   //choosing n ad t steps
   int n, t; // number of steps in x and t respectively.
-  cout << "n = " << endl;
+  cout << "n = ";
   cin >> n;
-  cout << "t = " << endl;
+  cout << "t = ";
   cin >> t;
 
   double dx = 1/(double) (n+1);
