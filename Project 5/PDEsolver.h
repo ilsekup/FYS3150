@@ -18,6 +18,7 @@ void explicitsch1D(int, int);
 void explicitsch2D(int, int);
 double *implicit(int, double);
 void solver_Thomas(double*, double *, double *, double *, double *, int);
+void CN(int , double , int , ostream&);
 
 
 #endif
