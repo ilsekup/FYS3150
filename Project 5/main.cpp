@@ -4,7 +4,7 @@
 #include <cmath>
 #include <string>
 #include "PDEsolver.h"
-#include "lib.h"
+#include"PDEsolver.cpp"
 #include <armadillo>
 
 using namespace std;
