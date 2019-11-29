@@ -32,12 +32,16 @@ def init():
 def animate(i):
     x = np.linspace(0,1, len(u_xx[0]))
     y = u_xx[i]
+    plt.title("Temporal evolution of density u as a function of the x-position time step t = %i"  % i\
+    , fontsize = 12)
     line.set_data(x, y)
+
     return line,
 
 anim = animation.FuncAnimation(fig, animate, init_func=init,
-                               frames=2000, interval=200, blit=True)
-plt.xlabel("x-position")
-plt.ylabel("u density")
-plt.title("Temporal evultion of density u as a function of the x-position")
+                               frames=2000, interval=200, blit=False)
+plt.xlabel("x-position", fontsize = 12)
+plt.ylabel("u density", fontsize = 12)
+plt.xticks(fontsize = 12)
+plt.yticks(fontsize = 12)
 plt.show()
