@@ -15,3 +15,14 @@ QR
 Numerical integration  
 Gauss quadrature  
 Monte Carlo integration  
+
+
+## Project 4
+Ising model
+Monte Carlo integration  
+Metropolis algorithm 
+
+
+## Project 5
+Diffusion equation 
+PDE solver 
