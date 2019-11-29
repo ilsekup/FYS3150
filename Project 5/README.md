@@ -1,7 +1,13 @@
-### PDEsolver.cpp 
-Explicit, implicit and crank nicolson in 1D, explicit in 2D. Writes results into text files.
+# Project 5  
+Numerical partial differential equation solver 
 
-### main.cpp
-runs the programs, run with armadillo 
-asks for n which is the number of points (excuding the set boundary points)
-and t which is timesteps 
+## Program descriptions  
+- **PDEsolver.cpp**  
+Contains the functions used for the explicit, implicit and crank-nicols scheme 
+
+- **main.cpp**  
+File used to run the functions, needs to be loaded with armadillo 
+ 
+
+- **makefile**  
+Compiles all programs
