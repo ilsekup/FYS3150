@@ -38,15 +38,15 @@ void explicitsch1D(int n, int t_steps)
   ofstream ofile("explicit.txt", ios::out);
 
   // setting up vectors and initial/bouandry conditions
-  vec u_xx = zeros<vec>(n+1);
-  vec u_t = zeros<vec>(n+1);
+  vec u_xx = zeros<vec>(n+2);
+  vec u_t = zeros<vec>(n+2);
   u_xx(0) = u_t(0) = 0.0;
-  u_xx(n) = u_t(n) = 1.0;
+  u_xx(n+1) = u_t(n+1) = 1.0;
 
   u_t.t().raw_print(ofile); // to write first line at i,j = 0
   for (int j = 1; j < t_steps + 1; j++) // iterating over temperatures
     {
-      for (int i = 1; i < n; i++) // iterating over x-position
+      for (int i = 1; i < n+1; i++) // iterating over x-position
       {
       u_t(i) = alpha*( u_xx(i-1) + u_xx(i+1) ) + (1 - 2*alpha) * u_xx(i);
       u_xx(i) = u_t(i);
