@@ -14,10 +14,10 @@ void writingfunc2D(int n, mat u_t, ostream& ofile3)
 {
   ofile3 << setiosflags(ios::showpoint | ios::uppercase);
 
-  for (int i = 0; i <= n; i++)
+  for (int i = 0; i < n; i++)
     {
       ofile3 << endl;
-      for (int k = 0; k <= n; k++)
+      for (int k = 0; k < n; k++)
       {
       ofile3 << setw(15) << setprecision(8) << u_t(i,k); // writes u for all x
       }
@@ -29,11 +29,10 @@ void writingfunc2D(int n, mat u_t, ostream& ofile3)
 
 
 //explicit 1D
-void explicitsch1D(int n, int t_steps)
+void explicitsch1D(int n, double dt, int t_steps)
 {
   // setting up steplength in x and t
   double dx = 1.0 / (n+1);
-  double dt = 1.0 /(t_steps);
   double alpha = dt / ( dx * dx);
   ofstream ofile("explicit.txt", ios::out);
 
@@ -57,51 +56,50 @@ void explicitsch1D(int n, int t_steps)
 }
 
 // explicit 2D
-void explicitsch2D(int n, int t_steps)
+void explicitsch2D(int n, double dt, int t_steps)
 {
-  double dt = 1.0 /(t_steps);
   // setting up steplength in x = y and t
   double dx = 1.0 / (n+1); //dy = dx , alpha is the same for both as well
   double alpha = dt / ( dx * dx);
   ofstream ofile("explicit2d.txt", ios::out);
 
   // setting up vectors/matrices and initial/bouandry conditions
-  mat u_yx = zeros<mat>(n+1,n+1);
-  mat u_t = zeros<mat>(n+1,n+1);
+  mat u_yx = zeros<mat>(n+2,n+2);
+  mat u_t = zeros<mat>(n+2,n+2);
 
 
   //these conditions imply that the left and right side of the lattice is 1, 0 everywhere else
   for(int i = 0; i < n + 1 ; i++)
   {
     u_yx(i,0) = 1.0;
-    u_yx(i,n) = 1.0;
+    u_yx(i,n+1) = 1.0;
     u_yx(0,i) = 0.0;
-    u_yx(n,i) = 0.0;
+    u_yx(n+1,i) = 0.0;
   }
-  u_yx(n,0) = 1;
-  u_yx(0,n) = 1;
-  u_yx(n,n) = 1;
+  u_yx(n+1,0) = 1;
+  u_yx(0,n+1) = 1;
+  u_yx(n+1,n+1) = 1;
   u_yx(0,0) = 1;
 
   u_t = u_yx; //setting matrices equal to each other so they have the same initial/bouandry conditions
 
   ofile << setiosflags(ios::showpoint | ios::uppercase);
-  ofile << n+1 << endl;
+  ofile << n+2 << endl;
 
-  writingfunc2D(n, u_t, ofile); // to write first line at i,j = 0
+  writingfunc2D(n+2, u_t, ofile); // to write first line at i,j = 0
 
-  for (int j = 1; j < t_steps; j++) // iterating over temperatures
+  for (int j = 1; j < t_steps; j++) // iterating over time
   {
-    for (int i = 1; i < n; i++) // iterating over x-position
+    for (int i = 1; i < n+1; i++) // iterating over x-position
     {
-        for(int k = 1; k < n; k++) //iteratinv over y-position
+        for(int k = 1; k < n+1; k++) //iteratinv over y-position
         {
         u_t(i,k) = alpha*(u_yx(i-1,k) + u_yx(i+1,k) + u_yx(i,k+1) + u_yx(i,k-1)) + (1 - 4*alpha) * u_yx(i,k);
         u_yx(i,k) = u_t(i,k);
         }
     }
 
-    writingfunc2D(n, u_t, ofile);
+    writingfunc2D(n+2, u_t, ofile);
   }
   ofile.close();
 }
@@ -132,9 +130,8 @@ void solver_Thomas(double* a, double* b, double* c, double* u, double* v, int n)
     }
 }
 
-double *implicit(int n, double t_steps){
+double *implicit(int n, double dt, double t_steps){
   double dx = 1/(double)(n+1);
-  double dt = 0.5*dx*dx;
   double alpha = dt/(dx*dx);
   double *vold = new double[n+2];
   double *vnew = new double[n+2];
