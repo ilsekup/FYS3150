@@ -29,14 +29,25 @@ for line in lines:
         arr[i] = np.fromstring(line, sep = ' ')
         i+=1
 
+file.close()
+
+infofile = open("runinfo.txt", 'r')
+line = infofile.readline().split('=')
+dt = float(line[1].split()[0].strip())
+t_stop = float(line[3].split()[0].strip())
+infofile.close()
+
+
 xmin, xmax, ymin, ymax = 0, 1, 0, 1
 x = y = np.linspace(0,1,N)
 X,Y=np.meshgrid(x,y)
-levels = 60
+levels = 128
 
-anim_time = 10 #s
-fps = 60
-tot_frames = anim_time*fps
+# It seems like setting these numbers (time and fps) too high causes the animation to eat all available RAM,
+# and freeze the system
+anim_time = 7 #s
+fps = 25
+tot_frames = int(anim_time*fps)
 
 n_skip = int(round(len(values)/tot_frames))
 
@@ -51,10 +62,14 @@ os.chdir(temppath)
 
 for i,frame in enumerate(frames):
     fig = plt.figure(figsize = (10,7))
+    time = n_skip*i*dt;
     plt.contourf(X,Y,frame,levels)
     plt.xlabel("x/L", fontsize = 14)
     plt.ylabel("y/L", fontsize = 14)
-    plt.colorbar()
+    plt.title(f"2D diffusion, n = {N-2}, t = {time:.4f}")
+    cbar = plt.colorbar(ticks=np.linspace(0,1,11))
+    cbar.ax.set_ylabel('Temperature (reduced units)', rotation=270, labelpad=15)
+    plt.tight_layout()
     plt.savefig(f"frame_{i:04d}.png")
     print(i)
     plt.close(fig)
