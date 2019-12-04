@@ -33,6 +33,8 @@ int main(int argc, char* argv[])
   implicit(n, dt, t);
   explicitsch2D(n,dt,t);
   CN(n,dt,t,ofile);
+  int it = implicit2D(n, dt, t);
+  cout << it << endl;
   ofile.close();
 
   ofstream ofile_info("runinfo.txt", ios::out);
