@@ -221,3 +221,59 @@ void CN(int n, double dt, int t_steps, ostream& ofile){
     writingfunc(n+2, v, ofile);
   }
 }
+
+int implicit2D(int n, double dt, int t_steps){ //implicit with jacobi solver
+  double dx = 1/(double) (n+1);
+  double tol = 1e-8;
+  double maxiterations = 10000;
+  mat A = zeros<mat>(n+2,n+2);
+  int iterations = jacobi(n, dt, A,tol, t_steps);
+  return iterations;
+}
+
+int jacobi(int n, double dt, mat &u, double tol, int t_steps){
+    double dx = 1/(n+1);
+    double alpha = dt/double(dx*dx);
+    mat uold = zeros<mat>(n+2, n+2); //timesteps before
+    ofstream ofile("implicit2d.txt", ios::out);
+    ofile << setiosflags(ios::showpoint | ios::uppercase);
+    ofile << n+2 << endl;
+    for(int i=0; i < n+2; i++){
+      u(0, i) = 0.0;
+      u(n+1, i) = 0.0;
+      u(i, 0) = 1.0;
+      u(i, n+1) = 1.0;
+    }
+    u(0, n+1) = 1.0;
+    u(n+1, 0) = 1.0;
+    for(int i = 0; i < n+2; i++){ //setting up an initial guess for the old timestep
+        for(int j = 0; j < n+2; j++){
+          uold(i,j) = 1.0;
+          }
+        }
+    writingfunc2D(n+2, u, ofile); // to write first line at i,j = 0
+    for(int t= 0; t < t_steps; t++){
+      for(int k = 0; k < 10000; k++){
+      for(int i=1; i < n+1; i++){
+        for(int j=1; j < n+1; j++){
+          u(i,j) = (uold(i+1, j) + uold(i-1, j) + uold(i, j+1) + u(i, j-1))/4.0;
+        }
+      }
+      double sum = 0.0;
+      for(int i = 0; i < n+2; i++){
+        for(int j =0; j < n+2; j++){
+          sum += (uold(i,j)- u(i,j))*(uold(i,j)-u(i,j));
+          uold(i,j) = u(i,j);
+        }
+      }
+      writingfunc2D(n+2, u, ofile);
+
+      if(sqrt(sum) < tol){
+        return k;
+      }
+      }
+
+    }
+    ofile.close();
+    return 10000;
+}
