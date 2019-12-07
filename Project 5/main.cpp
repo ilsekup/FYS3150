@@ -31,10 +31,9 @@ int main(int argc, char* argv[])
   //calling function which also does the writing into file
   explicitsch1D(n,dt,t);
   implicit(n, dt, t);
-  explicitsch2D(n,dt,t);
+  mat u_t = explicitsch2D(n,dt,t);
   CN(n,dt,t,ofile);
-  int it = implicit2D(n, dt, t);
-  cout << it << endl;
+  mat u = implicit2D(n, dt, t);
   ofile.close();
 
   ofstream ofile_info("runinfo.txt", ios::out);
