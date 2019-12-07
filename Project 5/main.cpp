@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
   char *outfilename;
   outfilename = argv[1];
 
-  //choosing n ad t steps
+  //choosing n and t steps
   int n, t; // number of steps in x and t respectively.
   double t_stop;
   cout << "n = ";
