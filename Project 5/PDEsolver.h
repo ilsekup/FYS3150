@@ -19,7 +19,7 @@ mat explicitsch2D(int,double, int);
 double *implicit(int,double, double);
 void solver_Thomas(double*, double *, double *, double *, double *, int);
 void CN(int , double , int , ostream&);
-mat implicit2D(int, double, int);
-mat jacobi(int, double, mat &, double, int);
+mat implicit2D(int, double, int, double (*)(double,double,double));
+mat jacobi(int, double, double, mat &, double (*)(double,double,double),double, int);
 
 #endif
