@@ -10,14 +10,14 @@
 using namespace std;
 using namespace arma;
 
-void writingfunc2D(int n, mat u_t, ostream& ofile3)
+void writingfunc2D(int nx, int ny, mat u_t, ostream& ofile3)
 {
   ofile3 << setiosflags(ios::showpoint | ios::uppercase);
 
-  for (int i = 0; i < n; i++)
+  for (int i = 0; i < nx; i++)
     {
       ofile3 << endl;
-      for (int k = 0; k < n; k++)
+      for (int k = 0; k < ny; k++)
       {
       ofile3 << setw(15) << setprecision(8) << u_t(i,k); // writes u for all x
       }
@@ -86,7 +86,7 @@ mat explicitsch2D(int n, double dt, int t_steps)
   ofile << setiosflags(ios::showpoint | ios::uppercase);
   ofile << n+2 << endl;
 
-  writingfunc2D(n+2, u_t, ofile); // to write first line at i,j = 0
+  writingfunc2D(n+2,n+2, u_t, ofile); // to write first line at i,j = 0
 
   for (int j = 1; j < t_steps; j++) // iterating over time
   {
@@ -99,7 +99,7 @@ mat explicitsch2D(int n, double dt, int t_steps)
         }
     }
 
-    writingfunc2D(n+2, u_t, ofile);
+    writingfunc2D(n+2,n+2, u_t, ofile);
     //u_t.print(" ");
   }
   ofile.close();
@@ -225,65 +225,58 @@ void CN(int n, double dt, int t_steps, ostream& ofile){
   }
 }
 
-mat implicit2D(int n, double dt, int t_steps, double (*f)(double,double,double)){ //implicit with jacobi solver
-  double dx = 1/(double) (n+1);
+// Solves 2D heat equation (with extra term) with implicit scheme and Jacobi solver
+// nx and ny is the number of points in x and y directions respectively
+// dt is the timestep, and t_step the total number of steps
+// u is the full initial conditons this will in practice also give boundary conditions, as these are not changed
+// (This also means that boundary conditions must be fixed values for this function to work)
+// f is the functions of t,x,y (in that order) that gives the extra term in the heatequation (heatproduction, set to 0 for standard)
+// ofils is the ostream where results are printed
+mat implicit2D(int nx, int ny, double dt, int t_steps, mat &u, double (*f)(double,double,double),ostream& ofile){
+  double h = 1/(double) (nx+1);
   double tol = 1e-8;
   double maxiterations = 10000;
-  mat A = zeros<mat>(n+2,n+2);
-  mat u = jacobi(n, dt, dx, A,f,tol, t_steps);
+  mat rho_tilde = zeros<mat>(nx+2,ny+2);
+  writingfunc2D(nx+2, ny+2, u, ofile); // to write first line at i,j = 0
+  for(int t= 0; t < t_steps; t++){
+    for(int i=0;i<nx+2;i++){
+      for(int j=0;j<ny+2;j++){
+        rho_tilde(i,j) = f(t*dt,i*h,j*h)*h*h/4;
+      }
+    }
+    u = jacobi(nx, ny, dt, h, u,rho_tilde,tol);
+    writingfunc2D(nx+2, ny+2, u, ofile); // to write first line at i,j = 0
+  }
   return u;
 }
 
-mat jacobi(int n, double dt, double h, mat &u, double (*f)(double,double,double), double tol, int t_steps){
-    double dx = 1/(double)(n+1);
-    double alpha = dt/double(dx*dx);
-    mat uold = zeros<mat>(n+2, n+2); //timesteps before
-    mat rho_tilde = zeros<mat>(n+2,n+2);
-    ofstream ofile("implicit2d.txt", ios::out);
-    ofile << setiosflags(ios::showpoint | ios::uppercase);
-    ofile << n+2 << endl;
-    // Setting boundary conditions
-    for(int i=0; i < n+2; i++){
-      u(0, i) = 1.0;
-      u(n+1, i) = 0.0;
-      u(i, 0) = 1-i*dx;
-      u(i, n+1) = 1-i*dx;
-    }
-    u(0, n+1) = 1.0;
-    u(n+1, 0) = 0.0;
-    for(int i = 0; i < n+2; i++){ //setting up an initial guess for the old timestep
-        for(int j = 0; j < n+2; j++){
+// The jacobi solver for the implicit 2d scheme
+mat jacobi(int nx, int ny, double dt, double h, mat &u, mat &rho_tilde, double tol){
+    double alpha = dt/double(h*h);
+    mat uold = zeros<mat>(nx+2, ny+2); //timesteps before
+
+    for(int i = 0; i < nx+2; i++){ //setting up an initial guess for the old timestep
+        for(int j = 0; j < ny+2; j++){
           uold(i,j) = 1.0;
           }
         }
-    writingfunc2D(n+2, u, ofile); // to write first line at i,j = 0
-    for(int t= 0; t < t_steps; t++){
-      for(int i=0;i<n+2;i++){
-        for(int j=0;j<n+2;j++){
-          rho_tilde(i,j) = f(t*dt,i*h,j*h)*h*h/4;
-        }
-      }
-      for(int k = 0; k < 10000; k++){
-      for(int i=1; i < n+1; i++){
-        for(int j=1; j < n+1; j++){
-          u(i,j) = (uold(i+1, j) + uold(i-1, j) + uold(i, j+1) + u(i, j-1))/4.0 + rho_tilde(i,j);
-        }
-      }
-      double sum = 0.0;
-      for(int i = 0; i < n+2; i++){
-        for(int j =0; j < n+2; j++){
-          sum += (uold(i,j)- u(i,j))*(uold(i,j)-u(i,j));
-          uold(i,j) = u(i,j);
-        }
-      }
-      writingfunc2D(n+2, u, ofile);
-      //u.print("u= ");
-      if(sqrt(sum) < tol){
-        return u;
-      }
-      }
 
+    for(int k = 0; k < 10000; k++){
+    for(int i=1; i < nx+1; i++){
+      for(int j=1; j < ny+1; j++){
+        u(i,j) = (uold(i+1, j) + uold(i-1, j) + uold(i, j+1) + u(i, j-1))/4.0 + rho_tilde(i,j);
+      }
     }
-    ofile.close();
+    double sum = 0.0;
+    for(int i = 0; i < nx+2; i++){
+      for(int j =0; j < ny+2; j++){
+        sum += (uold(i,j)- u(i,j))*(uold(i,j)-u(i,j));
+        uold(i,j) = u(i,j);
+      }
+    }
+    if(sqrt(sum) < tol){
+      return u;
+    }
+    }
     return u;
 }

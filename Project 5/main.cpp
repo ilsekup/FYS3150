@@ -9,10 +9,21 @@
 using namespace std;
 using namespace arma;
 
+// Filler function to solve laplace with a poisson solver
 double return_zero(double t, double x, double y){
   return 0;
 }
 
+mat set_initial_conditions(int n){
+  mat u = zeros<mat>(n+2, n+2); //timesteps before
+
+  // Setting initial and boundary conditions (most is just 0)
+  for(int j=0; j<n+2;j++){
+    u(0, j) = 1.0;
+    u(n+1, j) = 1.0;
+  }
+  return u;
+}
 int main(int argc, char* argv[])
 {
   //setup for writing in to file
@@ -31,17 +42,20 @@ int main(int argc, char* argv[])
   double dt = 0.4*dx*dx;
   t = t_stop/dt;
 
-  ofstream ofile(outfilename, ios::out);
   //calling function which also does the writing into file
   explicitsch1D(n,dt,t);
   implicit(n, dt, t);
   mat u_t = explicitsch2D(n,dt,t);
+
+  ofstream ofile(outfilename, ios::out);
   CN(n,dt,t,ofile);
-  mat u = implicit2D(n, dt, t, return_zero);
   ofile.close();
 
+  mat u0 = set_initial_conditions(n);
+  mat u = implicit2D(n, n, dt, t, u, return_zero, ofile);
+
   ofstream ofile_info("runinfo.txt", ios::out);
-  ofile_info << "dt = " << dt << " n = " << n  << " t_stop = " << t_stop << endl;
+  ofile_info << "dt = " << dt << " nx = " << n << " ny = " << n  << " t_stop = " << t_stop << endl;
   ofile_info.close();
   return 0;
 }
