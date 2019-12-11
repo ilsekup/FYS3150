@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 
-filename1 = "explicit.txt"
+filename1 = "implicit.txt"
 file1 = open(filename1, 'r')
 lines1 = file1.readlines()
 
@@ -56,10 +56,10 @@ plt.tight_layout()
 plt.show()
 
 #comaring the value at a timestep to the analytical one
-t_step = 130
+t_step = 19
 nhere = len(u_xx[t_step])
 x = np.linspace(0, 1, nhere)
-t = (1/nhere)**2*0.4*t_step
+t = (1/(nhere-1))**2*0.4*t_step
 sums = 0.0
 for i in range(1, 100000): #infinite sum
     sums += (-1)**i/(i*np.pi)*np.sin(i*np.pi*x)*np.exp(-(i*np.pi)**2*t)
