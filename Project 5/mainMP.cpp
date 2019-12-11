@@ -88,6 +88,61 @@ mat jacobiMP(int n, double dt, double h, mat &u, double (*f)(double,double,doubl
     return u;
 }//end of jacobi function
 
+mat explicitsch2DMP(int n)
+{
+  // setting up steplength in x = y and t
+  double dx = 1.0 / (n+1); //dy = dx , alpha is the same for both as well
+  int t_steps = 3*n*n;  //assures that t >= 2 n^2
+  double dt = 1.0/t_steps;
+  double alpha = dt / ( dx * dx);
+  ofstream ofile("explicit2d.txt", ios::out);
+
+  // setting up vectors/matrices and initial/bouandry conditions
+  mat u_yx = zeros<mat>(n+2,n+2);
+  mat u_t = zeros<mat>(n+2,n+2);
+
+
+  //these conditions imply that the left and right side of the lattice is 1, 0 everywhere else
+  for(int i = 0; i < n + 1 ; i++)
+  {
+    u_yx(i,0) = 1.0;
+    u_yx(i,n+1) = 1.0;
+    u_yx(0,i) = 0.0;
+    u_yx(n+1,i) = 0.0;
+  }
+  u_yx(n+1,0) = 1;
+  u_yx(0,n+1) = 1;
+  u_yx(n+1,n+1) = 1;
+  u_yx(0,0) = 1;
+
+  u_t = u_yx; //setting matrices equal to each other so they have the same initial/bouandry conditions
+
+  ofile << setiosflags(ios::showpoint | ios::uppercase);
+  ofile << n+2 << endl;
+
+  writingfunc2D(n+2, u_t, ofile); // to write first line at i,j = 0
+  int i,k;
+  for (int j = 1; j < t_steps; j++) // iterating over time
+  {
+  #pragma omp parlell default(shared) private(i,k)
+  { //start of paralell region
+      # pragma omp for
+    for (int i = 1; i < n+1; i++) // iterating over x-position
+    {
+        for(int k = 1; k < n+1; k++) //iteratinv over y-position
+        {
+        u_t(i,k) = alpha*(u_yx(i-1,k) + u_yx(i+1,k) + u_yx(i,k+1) + u_yx(i,k-1)) + (1 - 4*alpha) * u_yx(i,k);
+        u_yx(i,k) = u_t(i,k);
+        }
+    }
+  }
+    writingfunc2D(n+2, u_t, ofile);
+    //u_t.print(" ");
+  }
+  ofile.close();
+  //u_yx.print(" yx");
+  return u_yx;
+}
 
 int main(int argc, char* argv[])
 {
@@ -97,38 +152,28 @@ int main(int argc, char* argv[])
     high_resolution_clock::time_point t1, t2;
     duration<double, ratio<1,1>> time_spent;
 
-
-
-    t_steps = 20;
-    double dx = 1.0/(n+1);
-    double dt = 0.4*dx*dx;
-
-    omp_set_num_threads(4);
     int thread_num = omp_get_max_threads();
     cout << "  The number of processors available = " << omp_get_num_procs() << endl ;
     cout << "  The number of threads available    = " << thread_num <<  endl;
 
     ofstream ofile2("Time.txt", ios::out);
     ofile2 << setiosflags(ios::showpoint | ios::uppercase);
-    for(n = 10; n < 120; n += 10)
+    for(n = 10; n <= 100; n += 5)
     {
-      ofile2 << setw(15) << setprecision(8) << n;
+    ofile2 << setw(15) << setprecision(8) << n;
+    for (int p = 1; p <= 4; p++) // p = 1, 2, 3, 4
+     {
+      omp_set_num_threads(p);
       t1 = high_resolution_clock::now();
-      mat u = implicit2DMP(n,dt,t_steps,return_zero);
+      mat u = explicitsch2DMP(n);
       t2 = high_resolution_clock::now();
       time_spent = t2-t1;
-      cout << " Time_spent implicit 2D with OpenMP = " << \
-      time_spent.count() << " seconds for n = " << n << " and t_steps = " << t_steps << endl;
+      cout << " Time spent on Explicit 2D with OpenMP = " << \
+      time_spent.count() << " seconds for n = " << n  << " and " << p << " thread(s)  "<< endl;
       ofile2 << setw(15) << setprecision(8) << time_spent.count();
-
-      t1 = high_resolution_clock::now();
-      mat u2 = implicit2D(n,dt,t_steps,return_zero);
-      t2 = high_resolution_clock::now();
-      time_spent = t2-t1;
-      cout << " Time_spent implicit 2D = " << \
-      time_spent.count() << " seconds for n = " << n << " and t_steps = " << t_steps << endl;
-      ofile2 << setw(15) << setprecision(8) << time_spent.count() << endl;
+    }
+  ofile2 << endl;
   }
   ofile2.close();
-    return 0;
+  return 0;
 }
