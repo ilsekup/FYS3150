@@ -97,34 +97,38 @@ int main(int argc, char* argv[])
     high_resolution_clock::time_point t1, t2;
     duration<double, ratio<1,1>> time_spent;
 
+
+
+    t_steps = 20;
+    double dx = 1.0/(n+1);
+    double dt = 0.4*dx*dx;
+
     omp_set_num_threads(4);
     int thread_num = omp_get_max_threads();
     cout << "  The number of processors available = " << omp_get_num_procs() << endl ;
     cout << "  The number of threads available    = " << thread_num <<  endl;
 
-    if (argc<3){
-      cout << "Use command line arguemnts: n (dimension of matrix), t_stop" << endl;
-      return 0;
-      }
+    ofstream ofile2("Time.txt", ios::out);
+    ofile2 << setiosflags(ios::showpoint | ios::uppercase);
+    for(n = 10; n < 120; n += 10)
+    {
+      ofile2 << setw(15) << setprecision(8) << n;
+      t1 = high_resolution_clock::now();
+      mat u = implicit2DMP(n,dt,t_steps,return_zero);
+      t2 = high_resolution_clock::now();
+      time_spent = t2-t1;
+      cout << " Time_spent implicit 2D with OpenMP = " << \
+      time_spent.count() << " seconds for n = " << n << " and t_steps = " << t_steps << endl;
+      ofile2 << setw(15) << setprecision(8) << time_spent.count();
 
-    n = atof(argv[1]);
-    t_steps = atof(argv[2]);
-    double dx = 1/(double) (n+1);
-    double dt = 0.4*dx*dx;
-
-    t1 = high_resolution_clock::now();
-    mat u = implicit2DMP(n,dt,t_steps,return_zero);
-    t2 = high_resolution_clock::now();
-    time_spent = t2-t1;
-    cout << " Time_spent implicit 2D with OpenMP = " << \
-    time_spent.count() << " seconds for n = " << n << " and t_steps = " << t_steps << endl;
-
-    t1 = high_resolution_clock::now();
-    mat u2 = implicit2D(n,dt,t_steps,return_zero);
-    t2 = high_resolution_clock::now();
-    time_spent = t2-t1;
-    cout << " Time_spent implicit 2D = " << \
-    time_spent.count() << " seconds for n = " << n << " and t_steps = " << t_steps << endl;
-
+      t1 = high_resolution_clock::now();
+      mat u2 = implicit2D(n,dt,t_steps,return_zero);
+      t2 = high_resolution_clock::now();
+      time_spent = t2-t1;
+      cout << " Time_spent implicit 2D = " << \
+      time_spent.count() << " seconds for n = " << n << " and t_steps = " << t_steps << endl;
+      ofile2 << setw(15) << setprecision(8) << time_spent.count() << endl;
+  }
+  ofile2.close();
     return 0;
 }
