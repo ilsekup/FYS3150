@@ -2,8 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 
-
-filename1 = "explicit.txt"
+filename1 = "implicit.txt"
 file1 = open(filename1, 'r')
 lines1 = file1.readlines()
 
@@ -41,14 +40,13 @@ def animate(i):
         line.set_data(x, y)
         return line,
 
-
 def onClick(event):
     global pause
     pause ^= True
 
 anim = animation.FuncAnimation(fig, animate, init_func=init,
                                frames=2000, interval=200, blit=False)
-                               
+
 fig.canvas.mpl_connect('button_press_event', onClick)
 plt.xlabel("x-position", fontsize = 15)
 plt.ylabel("u density", fontsize = 15)
@@ -56,3 +54,18 @@ plt.xticks(fontsize = 15)
 plt.yticks(fontsize = 15)
 plt.tight_layout()
 plt.show()
+
+#comaring the value at a timestep to the analytical one
+t_step = 19
+nhere = len(u_xx[t_step])
+x = np.linspace(0, 1, nhere)
+t = (1/(nhere-1))**2*0.4*t_step
+sums = 0.0
+for i in range(1, 100000): #infinite sum
+    sums += (-1)**i/(i*np.pi)*np.sin(i*np.pi*x)*np.exp(-(i*np.pi)**2*t)
+result = x + 2*sums
+diff = sum(abs(u_xx[t_step]-result))/nhere
+print(result)
+print(u_xx[t_step])
+print(diff)
+print(nhere)
