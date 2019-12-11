@@ -14,9 +14,8 @@ double no_heat(double t, double x, double y){
 }
 
 // Returns the heat production as a function of position and time
-// (Neglects time evolution)
-double heat(double t, double x, double y){
-
+// (Neglects time evolution, for the first case)
+double heat1(double t, double x, double y){
   double W1 = 8064.0/1573.0;
   double W2 = 2016.0/1573.0;
   double W3 = 288.0/1573.0;
@@ -32,31 +31,99 @@ double heat(double t, double x, double y){
   return val;
 }
 
-int main(int argc, char* argv[])
-{
-  //setup for writing in to file
-  char *outfilename;
-  outfilename = argv[1];
+// Returns the heat production as a function of position and time
+// (Neglects time evolution, for the second case)
+double heat2(double t, double x, double y){
+  double W1 = 8064.0/1573.0;
+  double W2 = 2016.0/1573.0;
+  double W3 = 288.0/1573.0;
+  double W4 = 2880.0/1573.0;
+  double val=0.0;
 
+  if (x<1.0/6.0){
+    val=W1;
+  } else if (x<1.0/3.0){
+    val=W2;
+  } else {
+    val=W3+W4;
+  }
+  return val;
+}
+
+// Returns the heat production as a function of position and time
+// (with time evolution, for the third case)
+double heat3(double t, double x, double y){
+  double W1 = 8064.0/1573.0;
+  double W2 = 2016.0/1573.0;
+  double W3 = 288.0/1573.0;
+  double W4 = 2880.0/1573.0;
+
+  double halflife1 = 6.9931;
+  double halflife2 = 21.902;
+  double halflife3 = 1.9556; // confirmed
+
+  double log2 = log(2.0);
+
+  double tau1 = halflife1/log2;
+  double tau2 = halflife3/log2;
+  double tau3 = halflife3/log2;
+
+  double val=0.0;
+
+  if (x<1.0/6.0){
+    val=W1;
+  } else if (x<1.0/3.0){
+    val=W2;
+  } else {
+    val= W3 + 0.4*W4*(exp(-t/tau1)+exp(-t/tau2)+0.5*exp(-t/tau3));
+  }
+  return val;
+}
+
+mat set_initial_conditions(int nx, int ny, double dx){
+  mat u = zeros<mat>(nx+2, ny+2); //timesteps before
+
+  // Setting initial and boundary conditions
+  for(int i=0; i < nx+2; i++){
+    for(int j=0; j<ny+2;j++){
+      u(i, j) = 1-i*dx;
+    }
+  }
+  return u;
+}
+
+int main(int argc, char* argv[]){
   //choosing n and t steps
-  int n, t; // number of steps in x and t respectively.
+  int nx, ny, t; // number of steps in x and t respectively.
   double t_stop;
   cout << "n = ";
-  cin >> n;
+  cin >> nx;
   cout << "t_stop = ";
   cin >> t_stop;
 
-  double dx = 1/(double) (n+1);
+  ny = round(1.25*nx);
+
+  double dx = 1/(double) (nx+1);
   double dt = 0.4*dx*dx;
   t = t_stop/dt;
+  mat u = set_initial_conditions(nx, ny, dx);
 
-  ofstream ofile(outfilename, ios::out);
-  //calling function which also does the writing into file
-  mat u = implicit2D(n, dt, t, heat);
-  ofile.close();
+  ofstream ofile1("geosim1.txt", ios::out);
+  mat u1 = implicit2D(nx, ny, dt, t, u, heat1, ofile1);
+  ofile1.close();
 
+  u = set_initial_conditions(nx, ny, dx);
+  ofstream ofile2("geosim2.txt", ios::out);
+  mat u2 = implicit2D(nx, ny, dt, t, u, heat2, ofile2);
+  ofile2.close();
+
+  ofstream ofile3("geosim3.txt", ios::out);
+  mat u3 = implicit2D(nx, ny, dt, t, u, heat3, ofile3);
+  ofile3.close();
+
+  u = set_initial_conditions(nx, ny, dx);
   ofstream ofile_info("runinfo.txt", ios::out);
-  ofile_info << "dt = " << dt << " n = " << n  << " t_stop = " << t_stop << endl;
+  ofile_info << "dt = " << dt << " nx = " << nx  << " ny = " << ny << " t_stop = " << t_stop << endl;
   ofile_info.close();
   return 0;
 }
