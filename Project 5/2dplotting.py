@@ -60,6 +60,9 @@ def make_gif(filename,plotting_func):
     """
     Plots the first first tasks (with square matrices) and stores them in temp
     """
+    anim_time = 7 #s
+    fps = 25
+    tot_frames = int(anim_time*fps)
 
     infofile = open("runinfo.txt", 'r')
     line = infofile.readline().split('=')
@@ -69,36 +72,47 @@ def make_gif(filename,plotting_func):
     t_stop = float(line[4].split()[0].strip())
     infofile.close()
 
-    file = open(filename, 'r')
-    file.readline()
-    lines = file.readlines()
-
-
     dims = [nx, ny]
-
     arr = np.zeros(dims)
 
-    values = []
+    temppath = 'temp'
 
-    i = 0
-    for line in lines:
-        if line == '\n':
-            values.append(arr.copy())
-            arr = np.zeros(dims)
-            
-            i = 0
-        else:
-            arr[i] = np.fromstring(line, sep = ' ')
-            i+=1
+    if not os.path.exists(temppath):
+        os.mkdir(temppath)
 
-    file.close()
+    with open(filename, 'r') as file:
+        next(file)
+
+        i = 0
+        num_frames = 0
+        for line in file:
+            if line == '\n':
+                np.save(f"temp/frame{num_frames:05d}.npy",arr)
+                num_frames += 1
+                print(f"Timestep {num_frames} saved")
+                arr = np.zeros(dims)
+                
+                i = 0
+            else:
+                arr[i] = np.fromstring(line, sep = ' ')
+                i+=1
+
+    n_skip = int(num_frames/tot_frames)
+    use_frames = np.arange(0,num_frames)[::n_skip]
+
+    frames = []
+
+    for i,frame in enumerate(use_frames):
+        print(f"Loading frame {i} of {len(use_frames)}")
+        arr = np.load(f"temp/frame{frame:05d}.npy")
+        frames.append(arr.copy())
 
     # For geo-plotting
     base_vals = np.array([np.linspace(0.1787,1,nx)[::-1] for i in range(ny)]).T
     max_val = 0
-    for val in values:
-        if np.max(val-base_vals) > max_val:
-            max_val = np.max(val-base_vals)
+    for frame in frames:
+        if np.max(frame-base_vals) > max_val:
+            max_val = np.max(frame-base_vals)
 
     x = np.linspace(0,1,nx)
     ymax = 1*ny/nx
@@ -106,20 +120,6 @@ def make_gif(filename,plotting_func):
     X,Y=np.meshgrid(x,y)
     levels = 128
 
-    # It seems like setting these numbers (time and fps) too high causes the animation to eat all available RAM,
-    # and freeze the system
-    anim_time = 7 #s
-    fps = 25
-    tot_frames = int(anim_time*fps)
-
-    n_skip = int(round(len(values)/tot_frames))
-
-    frames = values[::n_skip]
-
-    temppath = 'temp'
-
-    if not os.path.exists(temppath):
-        os.mkdir(temppath)
 
     os.chdir(temppath)
 
