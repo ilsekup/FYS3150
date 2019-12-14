@@ -21,9 +21,9 @@ double heat1(double t, double x, double y){
   double W3 = 288.0/1573.0;
   double val=0.0;
 
-  if (x<1.0/6.0){
+  if ((1-x)<1.0/6.0){
     val=W1;
-  } else if (x<1.0/3.0){
+  } else if ((1-x)<1.0/3.0){
     val=W2;
   } else {
     val=W3;
@@ -40,9 +40,9 @@ double heat2(double t, double x, double y){
   double W4 = 2880.0/1573.0;
   double val=0.0;
 
-  if (x<1.0/6.0){
+  if ((1-x)<1.0/6.0){
     val=W1;
-  } else if (x<1.0/3.0){
+  } else if ((1-x)<1.0/3.0){
     val=W2;
   } else {
     val=W3+W4;
@@ -70,9 +70,9 @@ double heat3(double t, double x, double y){
 
   double val=0.0;
 
-  if (x<1.0/6.0){
+  if ((1-x)<1.0/6.0){
     val=W1;
-  } else if (x<1.0/3.0){
+  } else if ((1-x)<1.0/3.0){
     val=W2;
   } else {
     val= W3 + 0.4*W4*(exp(-t/tau1)+exp(-t/tau2)+0.5*exp(-t/tau3));
@@ -86,7 +86,7 @@ mat set_initial_conditions(int nx, int ny, double dx){
   // Setting initial and boundary conditions
   for(int i=0; i < nx+2; i++){
     for(int j=0; j<ny+2;j++){
-      u(i, j) = 1-i*dx;
+      u(i, j) = 1-i*dx*0.8213;
     }
   }
   return u;
@@ -108,15 +108,18 @@ int main(int argc, char* argv[]){
   t = t_stop/dt;
   mat u = set_initial_conditions(nx, ny, dx);
 
+  cout << "Starting on case 1" << endl;
   ofstream ofile1("geosim1.txt", ios::out);
   mat u1 = implicit2D(nx, ny, dt, t, u, heat1, ofile1);
   ofile1.close();
 
+  cout << "Starting on case 2" << endl;
   u = set_initial_conditions(nx, ny, dx);
   ofstream ofile2("geosim2.txt", ios::out);
   mat u2 = implicit2D(nx, ny, dt, t, u, heat2, ofile2);
   ofile2.close();
 
+  cout << "Starting on case 3" << endl;
   ofstream ofile3("geosim3.txt", ios::out);
   mat u3 = implicit2D(nx, ny, dt, t, u, heat3, ofile3);
   ofile3.close();
