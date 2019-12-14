@@ -10,7 +10,8 @@ CPPflags = c++ -O3 lib.cpp
 #MPIPROG = mpi_
 PROG = PDEsolver
 TESTPROG = testcode
-all: ${PROG} ${TESTPROG}
+GEOPROG = PDEgeo
+all: ${PROG} ${TESTPROG} ${GEOPROG}
 
 ${PROG}      : main.o PDEsolver.o
 			    ${CPPflags} main.o PDEsolver.o ${LIB}-o ${PROG}
@@ -18,6 +19,9 @@ ${PROG}      : main.o PDEsolver.o
 
 ${TESTPROG} :	 	tests-main.o  test_functions.o PDEsolver.o
 			${CPPflags} tests-main.o test_functions.o PDEsolver.o ${LIB} -o ${TESTPROG}
+
+${GEOPROG} : Geomain.o PDEsolver.o
+	${CPPflags} Geomain.o PDEsolver.o ${LIB} -o ${GEOPROG}
 
 main.o       : main.cpp
 				${CPPflags} -c main.cpp
@@ -29,6 +33,10 @@ tests-main.o :	tests-main.cpp
 
 test-functitons.o :			test_functions.cpp
 		        	${CPPflags} -c test_functions.cpp
+
+Geomain.o : Geomain.cpp 
+	${CPPflags} -c Geomain.cpp
+
 
 # ${MPIPROG} : mainMPI.o isingmodel.o
 # 				${MPICPPflags} mainMPI.o isingmodel.o -o ${MPIPROG}
