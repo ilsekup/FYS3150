@@ -241,7 +241,7 @@ mat implicit2D(int nx, int ny, double dt, int t_steps, mat &u, double (*f)(doubl
   for(int t= 0; t < t_steps; t++){
     for(int i=0;i<nx+2;i++){
       for(int j=0;j<ny+2;j++){
-        rho_tilde(i,j) = f(t*dt,i*h,j*h)*h*h/4;
+        rho_tilde(i,j) = f(t*dt,i*h,j*h);
       }
     }
     u = jacobi(nx, ny, dt, h, u,rho_tilde,tol);
@@ -254,17 +254,19 @@ mat implicit2D(int nx, int ny, double dt, int t_steps, mat &u, double (*f)(doubl
 mat jacobi(int nx, int ny, double dt, double h, mat &u, mat &rho_tilde, double tol){
     double alpha = dt/double(h*h);
     mat uold = zeros<mat>(nx+2, ny+2); //timesteps before
+    mat uprev = zeros<mat>(nx+2, ny+2); //timesteps before
 
-    for(int i = 0; i < nx+2; i++){ //setting up an initial guess for the old timestep
-        for(int j = 0; j < ny+2; j++){
+    for(int i = 1; i < nx+1; i++){ //setting up an initial guess for the old timestep
+        for(int j = 1; j < ny+1; j++){
           uold(i,j) = 1.0;
+          uprev(i,j) = u(i,j);
           }
         }
 
     for(int k = 0; k < 10000; k++){
     for(int i=1; i < nx+1; i++){
       for(int j=1; j < ny+1; j++){
-        u(i,j) = (uold(i+1, j) + uold(i-1, j) + uold(i, j+1) + u(i, j-1))/4.0 + rho_tilde(i,j);
+        u(i,j) = (alpha*(uold(i+1, j) + uold(i-1, j) + uold(i, j+1) + uold(i, j-1)) + uprev(i, j)+ rho_tilde(i,j)*dt)/(double)(1+4*alpha);
       }
     }
     double sum = 0.0;
