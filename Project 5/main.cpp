@@ -11,7 +11,7 @@ using namespace arma;
 
 // Filler function to solve laplace with a poisson solver
 double return_zero(double t, double x, double y){
-  return 0;
+  return 0.0;
 }
 
 mat set_initial_conditions(int n){
@@ -38,6 +38,8 @@ int main(int argc, char* argv[])
   cout << "t_stop = ";
   cin >> t_stop;
 
+  int nx,ny;
+  nx = ny = n;
   double dx = 1/(double) (n+1);
   double dt = 0.4*dx*dx;
   t = t_stop/dt;
@@ -51,8 +53,10 @@ int main(int argc, char* argv[])
   CN(n,dt,t,ofile);
   ofile.close();
 
+  ofstream ofile2("implicit2D.txt", ios::out);
   mat u0 = set_initial_conditions(n);
-  mat u = implicit2D(n, n, dt, t, u, return_zero, ofile);
+  mat u = implicit2D(nx, ny, dt, t, u0, return_zero, ofile2);
+  ofile2.close();
 
   ofstream ofile_info("runinfo.txt", ios::out);
   ofile_info << "dt = " << dt << " nx = " << n << " ny = " << n  << " t_stop = " << t_stop << endl;
