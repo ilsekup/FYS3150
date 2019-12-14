@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
-import sys, os
+import sys, os, shutil
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 """
@@ -11,7 +11,7 @@ For the non-specific case, set plotfunc (sys.argv[2]) to plot_square
 For the geological case, set plotfunc to plot_geo
 """
 
-def plot_square(X,Y,vals,N,time,i):
+def plot_square(X,Y,vals,N,time,i,max_val):
     """
     Plots contour plot for the square case (not representing any physical case)
     """
@@ -27,11 +27,11 @@ def plot_square(X,Y,vals,N,time,i):
     plt.savefig(f"frame_{i:04d}.png")
     plt.close(fig)
 
-def plot_geo(X,Y,vals,nx,time,i):
+def plot_geo(X,Y,vals,nx,time,i,max_val):
     """
     Plots contour plot for the geological case
     """
-    levels = 128
+    levels = np.linspace(0,max_val*1573.0,128)
 
     # Rescale units
     X_plot = (1-X)*120.0
@@ -39,14 +39,18 @@ def plot_geo(X,Y,vals,nx,time,i):
     vals_plot = vals*1573.0
     vals_plot -= 273.15
     time_use = time*0.6392
+    base_vals = np.array([np.linspace(0.1787,1,nx)[::-1] for i in range(np.max(X.shape))]).T
+    base_vals *= 1573.0
+    base_vals -= 273.15
+    vals_plot -= base_vals
     fig = plt.figure(figsize = (10,7))
-    plt.contourf(Y_plot,X_plot,vals_plot.T,levels)
+    plt.contourf(Y_plot,X_plot,vals_plot.T,levels,extend='both')
     plt.axis("equal")
-    plt.xlabel("With [km]", fontsize = 14)
+    plt.xlabel("Width [km]", fontsize = 14)
     plt.ylabel("Depth [km]", fontsize = 14)
     plt.title(rf"Heatflow in lithosphere, $n_x$ = {nx-2}, t = {time:.4f} Gyr",fontsize=16)
     cbar = plt.colorbar()
-    cbar.ax.set_ylabel(r'Temperature ${}^\circ$ C', rotation=270, labelpad=15)
+    cbar.ax.set_ylabel(r'Temperature difference [${}^\circ$ C]', rotation=270, labelpad=15)
     plt.tight_layout()
     plt.gca().invert_yaxis()
     plt.savefig(f"frame_{i:04d}.png")
@@ -79,14 +83,22 @@ def make_gif(filename,plotting_func):
     i = 0
     for line in lines:
         if line == '\n':
+            values.append(arr.copy())
             arr = np.zeros(dims)
-            values.append(arr)
+            
             i = 0
         else:
             arr[i] = np.fromstring(line, sep = ' ')
             i+=1
 
     file.close()
+
+    # For geo-plotting
+    base_vals = np.array([np.linspace(0.1787,1,nx)[::-1] for i in range(ny)]).T
+    max_val = 0
+    for val in values:
+        if np.max(val-base_vals) > max_val:
+            max_val = np.max(val-base_vals)
 
     x = np.linspace(0,1,nx)
     ymax = 1*ny/nx
@@ -114,9 +126,17 @@ def make_gif(filename,plotting_func):
     for i,frame in enumerate(frames):
         time = n_skip*i*dt;
         print(f"Plotting frame {i} of {len(frames)}")
-        plotting_func(X,Y,frame,nx,time,i)
+        plotting_func(X,Y,frame,nx,time,i,max_val)
 
-    os.system(f"convert -delay {100/fps} -loop 0 *.png output.gif")
+    file_head = filename.split(".")[0]
+    os.system(f"ffmpeg -r {fps} -i frame_%04d.png -vcodec libx264 -crf 20 {file_head}.mp4")
+    os.chdir("..")
+    shutil.move(f"temp/{file_head}.mp4", f"Results/{file_head}.mp4")
+    transfer_frames = [0,20,80,i]
+    for k,j in enumerate(transfer_frames):
+        shutil.move(f"temp/frame_{j:04d}.png", f"Results/{file_head}_{k}.png")
+
+    shutil.rmtree('temp')
 
 filename = sys.argv[1]
 plotfunc_string = sys.argv[2]
