@@ -119,9 +119,14 @@ int main(int argc, char* argv[]){
   mat u2 = implicit2D(nx, ny, dt, t, u, heat2, ofile2);
   ofile2.close();
 
-  cout << "Starting on case 3" << endl;
+  // Simulate 3 Gyr with decay
+  int t3;
+  t3 = 3/dt;
+
+  u = set_initial_conditions(nx, ny, dx);
+  cout << "Starting on case 3 (3 Gyr simulation)" << endl;
   ofstream ofile3("geosim3.txt", ios::out);
-  mat u3 = implicit2D(nx, ny, dt, t, u, heat3, ofile3);
+  mat u3 = implicit2D(nx, ny, dt, t3, u, heat3, ofile3);
   ofile3.close();
 
   u = set_initial_conditions(nx, ny, dx);
