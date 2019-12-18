@@ -15,6 +15,6 @@ Compiles all programs and runs testfunctions
 - **plottingdiff.py**  
 Makes animation of one dimensional data.
 
-- **2dplotting.py**
+- **2dplotting.py**  
 Makes contour plots of the 2D data. Needs ffmpeg installed in order to function properly and make an mp4 file, without this installed the frames will not be removed and a temp folder with a lot of files will be stored on computer. 
 
