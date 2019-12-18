@@ -48,7 +48,7 @@ def plot_geo(X,Y,vals,nx,time,i,max_val):
     plt.axis("equal")
     plt.xlabel("Width [km]", fontsize = 14)
     plt.ylabel("Depth [km]", fontsize = 14)
-    plt.title(rf"Heatflow in lithosphere, $n_x$ = {nx-2}, t = {time:.4f} Gyr",fontsize=16)
+    plt.title(rf"Heatflow in lithosphere, $n_x$ = {nx-2}, t = {0.6392*time:.4f} Gyr",fontsize=16)
     cbar = plt.colorbar()
     cbar.ax.set_ylabel(r'Temperature difference [${}^\circ$ C]', rotation=270, labelpad=15)
     plt.tight_layout()
