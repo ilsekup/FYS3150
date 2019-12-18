@@ -9,7 +9,7 @@ Contains the functions used for the explicit, implicit and crank-nicolson scheme
 File used to run the functions, needs to be loaded with armadillo and PDEsolver.cpp
 
 - **Geomain.cpp**  
-File used to simulate the three geological cases, must be loaded with armadillo.
+File used to simulate the three geological cases, must be loaded with armadillo and PDEsolver.cpp.
 In the report this was run with n=100, and it automatically runs the last case to 3 Gyr (as time evolution is more important for this case)
 Note that these parameters produce a 22 GB textfile. The value for N could therefore be lowered to save space.  
 
