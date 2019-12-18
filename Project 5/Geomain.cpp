@@ -98,8 +98,10 @@ int main(int argc, char* argv[]){
   double t_stop;
   cout << "n = ";
   cin >> nx;
-  cout << "t_stop = ";
+  cout << "t_stop (in Gyr) = ";
   cin >> t_stop;
+
+  t_stop = t_stop/0.6392;
 
   ny = round(1.25*nx);
 
@@ -121,7 +123,7 @@ int main(int argc, char* argv[]){
 
   // Simulate 3 Gyr with decay
   int t3;
-  t3 = 3/dt;
+  t3 = 3/(dt*0.6392);
 
   u = set_initial_conditions(nx, ny, dx);
   cout << "Starting on case 3 (3 Gyr simulation)" << endl;
